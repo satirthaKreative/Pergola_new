@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 12, 2021 at 01:48 PM
+-- Generation Time: Mar 15, 2021 at 02:25 PM
 -- Server version: 10.4.17-MariaDB
 -- PHP Version: 8.0.2
 
@@ -264,7 +264,32 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (13, '2021_01_22_044158_create-pick-louvered-panel-table', 10),
 (14, '2021_01_22_095740_create-final-product-table', 11),
 (15, '2021_01_25_045049_create-master-width-table', 12),
-(16, '2021_01_25_045439_create-master-height-table', 13);
+(16, '2021_01_25_045439_create-master-height-table', 13),
+(17, '2021_03_15_052624_create-master-overhead-shades-tbl', 14),
+(18, '2021_03_15_073112_alter-pergola-overhead-shade-tbl', 15);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `overhead_shades_tbl`
+--
+
+CREATE TABLE `overhead_shades_tbl` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `overhead_shades_val` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `admin_action` enum('yes','no') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'yes',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `overhead_shades_tbl`
+--
+
+INSERT INTO `overhead_shades_tbl` (`id`, `overhead_shades_val`, `admin_action`, `created_at`, `updated_at`) VALUES
+(3, 'regular', 'yes', '2021-03-15 01:52:12', '2021-03-15 01:52:24'),
+(4, 'standard', 'yes', '2021-03-15 01:58:33', '2021-03-15 01:58:33'),
+(5, 'test', 'yes', '2021-03-15 01:58:42', '2021-03-15 01:58:42');
 
 -- --------------------------------------------------------
 
@@ -364,6 +389,10 @@ INSERT INTO `pick_louvered_panel_tbls` (`id`, `l_panel_name`, `l_panel_price`, `
 CREATE TABLE `pick_overhead_shades_tbls` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `img_standard_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `master_width` bigint(20) NOT NULL,
+  `master_height` bigint(20) NOT NULL,
+  `master_post` bigint(20) NOT NULL,
+  `master_overhead_shades` bigint(20) NOT NULL,
   `price_details` double(8,2) DEFAULT NULL,
   `img_file` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `admin_action` enum('yes','no') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'yes',
@@ -375,10 +404,8 @@ CREATE TABLE `pick_overhead_shades_tbls` (
 -- Dumping data for table `pick_overhead_shades_tbls`
 --
 
-INSERT INTO `pick_overhead_shades_tbls` (`id`, `img_standard_name`, `price_details`, `img_file`, `admin_action`, `created_at`, `updated_at`) VALUES
-(1, 'open', 50.00, 'public/ladder_spacing/4rNVVnzCtuTxzzN4I0y4cUJTjGtx2P8Z9XCiI3e3.jpg', 'yes', '2021-01-21 04:28:35', '2021-01-21 04:56:49'),
-(2, 'regular', 100.00, 'public/ladder_spacing/39BxE8SmGfErwM2YHxsca760SZZXsjOedrkbdAyG.jpg', 'yes', '2021-01-21 04:33:32', '2021-01-21 04:56:59'),
-(3, 'sunblocker', 150.00, 'public/ladder_spacing/xs1u8yx6hRXNt7NIW19Dfy94D4L2RpU3ozxo8yV6.jpg', 'yes', '2021-01-29 17:51:34', '2021-01-29 17:51:34');
+INSERT INTO `pick_overhead_shades_tbls` (`id`, `img_standard_name`, `master_width`, `master_height`, `master_post`, `master_overhead_shades`, `price_details`, `img_file`, `admin_action`, `created_at`, `updated_at`) VALUES
+(1, 'regular', 2, 1, 2, 3, 100.00, 'public/ladder_spacing/xjyCVAWwmJbm7Kxoa1yyBflFF3MDDcqwyrr61Ks9.jpg', 'yes', '2021-03-15 05:39:33', '2021-03-15 05:39:33');
 
 -- --------------------------------------------------------
 
@@ -594,6 +621,12 @@ ALTER TABLE `migrations`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `overhead_shades_tbl`
+--
+ALTER TABLE `overhead_shades_tbl`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `password_resets`
 --
 ALTER TABLE `password_resets`
@@ -692,7 +725,7 @@ ALTER TABLE `final_product_tbls`
 -- AUTO_INCREMENT for table `master_height_tbls`
 --
 ALTER TABLE `master_height_tbls`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `master_width_tbls`
@@ -704,7 +737,13 @@ ALTER TABLE `master_width_tbls`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT for table `overhead_shades_tbl`
+--
+ALTER TABLE `overhead_shades_tbl`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `pickup_footprint_tbls`
@@ -728,7 +767,7 @@ ALTER TABLE `pick_louvered_panel_tbls`
 -- AUTO_INCREMENT for table `pick_overhead_shades_tbls`
 --
 ALTER TABLE `pick_overhead_shades_tbls`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `pick_post_length_tbls`
