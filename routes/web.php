@@ -67,6 +67,14 @@ Route::group(['prefix' => 'admin'], function(){
 			Route::get('/master-width-action-del','Admin\Dashboard\MasterWidth\MasterWidthController@changeActionDel')->name('admin.master-width-action-del');
 			Route::get('/master-width-action-get-edit','Admin\Dashboard\MasterWidth\MasterWidthController@getActionEdit')->name('admin.master-width-action-get-edit');
 			Route::post('/master-width-action-edit/{my_data}','Admin\Dashboard\MasterWidth\MasterWidthController@changeActionEdit')->name('admin.master-width-action-edit');
+			// Master Overhead Shades 
+			Route::get('/master-overhead-shades','Admin\Dashboard\MasterOverheadShades\MasterOverShadeController@index')->name('admin.master-overhead-shades-show');
+			Route::get('/master-overhead-shades-show','Admin\Dashboard\MasterOverheadShades\MasterOverShadeController@showP')->name('admin.master-overhead-shades-show-actual-data');
+			Route::post('/master-overhead-shades-add','Admin\Dashboard\MasterOverheadShades\MasterOverShadeController@addP')->name('admin.master-overhead-shades-show-actual-submit');
+			Route::get('/master-overhead-shades-action-change-show','Admin\Dashboard\MasterOverheadShades\MasterOverShadeController@actionP')->name('admin.master-overhead-shades-show-action-change-data');
+			Route::get('/master-overhead-shades-action-get-edit','Admin\Dashboard\MasterOverheadShades\MasterOverShadeController@showEditP')->name('admin.master-overhead-shades-action-get-edit');
+			Route::post('/master-overhead-shades-action-edit/{my_data}','Admin\Dashboard\MasterOverheadShades\MasterOverShadeController@updateP')->name('admin.master-overhead-shades-action-edit');
+			Route::get('/master-overhead-shades-action-del','Admin\Dashboard\MasterOverheadShades\MasterOverShadeController@removeP')->name('admin.master-overhead-shades-action-del');
 			// posts
 			Route::get('/add-posts','Admin\Dashboard\PillerPost\PillerPostController@showPage')->name('admin.add-posts');
 			Route::get('/admin-submit-piller-posts','Admin\Dashboard\PillerPost\PillerPostController@submitPiller')->name('admin.submit-piller-posts');
@@ -76,6 +84,9 @@ Route::group(['prefix' => 'admin'], function(){
 			Route::get('/admin-piller-action-get-edit','Admin\Dashboard\PillerPost\PillerPostController@getActionEdit')->name('admin.piller-action-get-edit');
 			Route::get('/admin-piller-action-edit','Admin\Dashboard\PillerPost\PillerPostController@changeActionEdit')->name('admin.piller-action-edit');
 			// Pick Overhead Shades
+			Route::get('/pick-overhead-shades-height-width-first-load','Admin\Dashboard\PickOverheadShades\PickOverheadShadesController@showActualData')->name('admin.pick-overhead-shades-height-width-first-load');
+			Route::get('/pick-overhead-shades-post-first-load','Admin\Dashboard\PickOverheadShades\PickOverheadShadesController@showPostLoadfx')->name('admin.pick-overhead-shades-post-first-load');
+
 			Route::get('/add-pick-overhead-shades','Admin\Dashboard\PickOverheadShades\PickOverheadShadesController@showPage')->name('admin.add-pick-overhead-shades');
 			Route::post('/admin-submit-pick-overhead-shades','Admin\Dashboard\PickOverheadShades\PickOverheadShadesController@submitOverheadShades')->name('admin.submit-pick-overhead-shades');
 			Route::get('/admin-show-pick-overhead-shades','Admin\Dashboard\PickOverheadShades\PickOverheadShadesController@showOverheadShades')->name('admin.show-pick-overhead-shades');

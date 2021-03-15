@@ -21,6 +21,9 @@
     margin-right: 7px;
     margin-bottom: 0;
 }
+nav.mt-2 {
+    font-size: 14px;
+}
 </style>
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
   <!-- Brand Logo -->
@@ -103,6 +106,12 @@
               <a href="{{ route('admin.master-width') }}" class="nav-link @if($page == 'master-width') active @endif">
                 <i class="far fa-circle nav-icon"></i>
                 <p>View Master Widths</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('admin.master-overhead-shades-show') }}" class="nav-link @if($page == 'master-overhead-shades') active @endif">
+                <i class="far fa-circle nav-icon"></i>
+                <p>View Master Overhead Shades</p>
               </a>
             </li>
           </ul>

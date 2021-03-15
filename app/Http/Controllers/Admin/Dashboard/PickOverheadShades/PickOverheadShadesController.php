@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Admin\Dashboard\PickOverheadShades;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Model\Admin\PickOverheadShades\PickOverheadShadesModel;
+use App\Model\Admin\PickUpFootPrint\PickUpFootPrintModel;
+use App\Model\Admin\MasterHeight\MasterHeightModel;
+use App\Model\Admin\MasterWidth\MasterWidthModel;
+use App\Model\Admin\PillerPost\PillerPostModel;
+use App\Model\Admin\MasterOverheadModel;
 
 class PickOverheadShadesController extends Controller
 {
@@ -20,9 +25,69 @@ class PickOverheadShadesController extends Controller
         return view('backend.pages.pick-overhead-shades.pick-overhead-shades');
     }
 
+    public function showActualData(Request $request)
+    {
+        // master height
+        $fetchMasterHeight = MasterHeightModel::get();
+        $html['master_height'] = '<option value="">Choose height</option>';
+        if(count($fetchMasterHeight) > 0)
+        {
+            foreach($fetchMasterHeight as $fetchH)
+            {
+                $html['master_height'] .= '<option value="'.$fetchH->id.'">'.$fetchH->master_height_length.'</option>';
+            }
+        }
+
+        // master width
+        $fetchMasterWidth = MasterWidthModel::get();
+        $html['master_width'] = '<option value="">Choose width</option>';
+        if(count($fetchMasterWidth) > 0)
+        {
+            foreach($fetchMasterWidth as $fetchW)
+            {
+                $html['master_width'] .= '<option value="'.$fetchW->id.'">'.$fetchW->master_width_length.'</option>';
+            }
+        }
+
+        // master overhead Shade
+        $fetchMasterOverheadShades = MasterOverheadModel::get();
+        $html['master_overhead'] = '<option value="">Choose overhead shades</option>';
+        if(count($fetchMasterOverheadShades) > 0)
+        {
+            foreach($fetchMasterOverheadShades as $fetchO)
+            {
+                $html['master_overhead'] .= '<option value="'.$fetchO->id.'">'.$fetchO->overhead_shades_val.'</option>';
+            }
+        }
+
+        echo json_encode($html);
+    }
+
+    public function showPostLoadfx(Request $request)
+    {
+        $w_val = $_GET['w_id'];
+        $h_val = $_GET['h_id'];
+
+        $postQuery = PickUpFootPrintModel::where(['width_master' => $w_val, 'height_master' => $h_val])->get();
+        $html['master_posts'] = '<option value="">Choose posts</option>';
+        if(count($postQuery) > 0)
+        {
+            foreach($postQuery as $pQuery)
+            {
+                $getPostQuery = PillerPostModel::where(['id' => $pQuery->posts_master])->get();
+                foreach($getPostQuery as $gPQuery)
+                {
+                    $html['master_posts'] .= '<option value="'.$gPQuery->id.'">'.$gPQuery->no_of_posts.'</option>';
+                }
+                
+            }
+        }
+        echo  json_encode($html);
+    }
+
     public function submitOverheadShades(Request $request)
     {
-        $checkQuery = PickOverheadShadesModel::where(['img_standard_name' => strtolower($request->input('ladder_spacing')) ])->get();
+        $checkQuery = PickOverheadShadesModel::where(['master_width' => $request->input('master_width'), 'master_height' => $request->input('master_height'), 'master_post' => $request->input('master_post'), 'master_overhead_shades' => $request->input('ladder_spacing')])->get();
         if(count($checkQuery) > 0)
         {
             $request->session()->flash('error_msg', 'This ladder spacing already added before');
@@ -39,10 +104,19 @@ class PickOverheadShadesController extends Controller
                     $our_story_img = "";
                 }
 
+                $overshadegettingQuery = MasterOverheadModel::where('id',$request->input('ladder_spacing'))->get();
+                foreach($overshadegettingQuery as $oqQuery)
+                {
+                    $ladderSpacing = $oqQuery->overhead_shades_val;
+                }
             
 
                 $insertArr = [
-                    'img_standard_name' => strtolower($request->input('ladder_spacing')), 
+                    'master_width' => $request->input('master_width'), 
+                    'master_height' => $request->input('master_height'), 
+                    'master_post' => $request->input('master_post'), 
+                    'master_overhead_shades' => $request->input('ladder_spacing'),
+                    'img_standard_name' => strtolower($ladderSpacing), 
                     'price_details' => $request->input('ladder_spacing_price'), 
                     'img_file' => $our_story_img, 
                     'admin_action' => 'yes', 
@@ -101,11 +175,42 @@ class PickOverheadShadesController extends Controller
                 $del_state = '<a href="javascript: ;" onclick=make_del_change('.$sQuery->id.') class="text-danger"><i class="fa fa-trash"></i></a>';
 
                 $edit_state = '<a href="javascript: ;" onclick=make_edit_change('.$sQuery->id.') class="text-info"><i class="fa fa-edit"></i></a>';
+
+                // master height
+                $fetchMasterHeight = MasterHeightModel::where(['id' => $sQuery->master_height])->get();
+                if(count($fetchMasterHeight) > 0)
+                {
+                    foreach($fetchMasterHeight as $fetchH)
+                    {
+                        $html_master_height = $fetchH->master_height_length;
+                    }
+                }
+
+                // master width
+                $fetchMasterWidth = MasterWidthModel::where(['id' => $sQuery->master_width])->get();
+                if(count($fetchMasterWidth) > 0)
+                {
+                    foreach($fetchMasterWidth as $fetchW)
+                    {
+                        $html_master_width = $fetchW->master_width_length;
+                    }
+                }
+
+                // master overhead Shade
+                $fetchMasterOverheadShades = PillerPostModel::where(['id' => $sQuery->master_post])->get();
+                if(count($fetchMasterOverheadShades) > 0)
+                {
+                    foreach($fetchMasterOverheadShades as $fetchO)
+                    {
+                        $html_master_post = $fetchO->no_of_posts;
+                    }
+                }
                 
                 
                 $html .= "<tr>
                             <td>".++$i."</td>
                             <td>".$img_path."</td>
+                            <td>".$html_master_width."ft. x ".$html_master_height."ft. x ".$html_master_post." post</td>
                             <td>".ucwords($sQuery->img_standard_name)."<br /><b>$".$sQuery->price_details."</b></td>
                             <td>".$status."</td>
                             <td>".$action_btn." ".$del_state." ".$edit_state."</td>
@@ -115,7 +220,7 @@ class PickOverheadShadesController extends Controller
         else
         {
             $html = '<tr>
-                        <td colspan="5"><center class="text-danger"><i class="fa fa-times"></i> No Data</center></td>
+                        <td colspan="6"><center class="text-danger"><i class="fa fa-times"></i> No Data</center></td>
                     </tr>';   
         }
 
