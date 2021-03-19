@@ -114,6 +114,12 @@ nav.mt-2 {
                 <p>View Master Overhead Shades</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="{{ route('admin.master-post-length-show') }}" class="nav-link @if($page == 'master-post-length') active @endif">
+                <i class="far fa-circle nav-icon"></i>
+                <p>View Master Post Lengths</p>
+              </a>
+            </li>
           </ul>
         </li>
 
@@ -241,6 +247,24 @@ nav.mt-2 {
               <a href="{{ route('admin.add-pick-panel') }}" class="nav-link @if($page == 'add-pick-panel') active @endif">
                 <i class="far fa-circle nav-icon"></i>
                 <p>View Pick Louvered Panel</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <li class="nav-item has-treeview">
+          <a href="javascript: ;" class="nav-link @if($page == 'combination-panel') active @endif">
+            <i class="nav-icon fas fa-edit"></i>
+            <p>
+            Combination Panel
+              <i class="fas fa-angle-left right"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="{{ route('admin.combination-panel') }}" class="nav-link @if($page == 'combination-panel') active @endif">
+                <i class="far fa-circle nav-icon"></i>
+                <p>View Combination Panel</p>
               </a>
             </li>
           </ul>

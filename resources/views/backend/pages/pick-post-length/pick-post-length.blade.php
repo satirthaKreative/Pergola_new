@@ -20,7 +20,7 @@
     <div class="container-fluid">
       <div class="row">
         <!-- left column -->
-        <div class="col-md-6">
+        <div class="col-md-12">
         <div class="card card-success">
             <div class="card-header">
               <h3 class="card-title">Pick Post Length Table</h3>
@@ -34,6 +34,7 @@
                   <tr>
                     <th>ID</th>
                     <th>Images</th>
+                    <th>Combination</th>
                     <th>Size</th>
                     <th>Status</th>
                     <th>Action</th>
@@ -66,17 +67,43 @@
             <form role="form" id="admin-submit-pick-overhead-shades-form-id" enctype="multipart/form-data" method="POST" action="{{ route('admin.submit-pick-post-length') }}">
             @csrf
               <div class="card-body">
+              <div class="form-group">
+                  <label for="ladder-spacing-id">Master Width *</label>
+                  <select required class="form-control" name="master_width" id="master-width-id" placeholder="Enter width" onclick="master_width_onchange()">
+                    <option value="">Choose master width</option>
+                  </select>
+              </div>
+              <div class="form-group">
+                  <label for="ladder-spacing-id">Master Height *</label>
+                  <select required class="form-control" name="master_height" id="master-height-id" placeholder="Enter height" onclick="master_width_onchange()">
+                    <option value="">Choose master height</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="ladder-spacing-id">Master Posts *</label>
+                  <select required class="form-control" name="master_post" id="master-post-id" placeholder="Enter post" onclick="master_width_onchange()">
+                    <option value="" >Choose master posts</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="ladder-spacing-id">Ladder Spacing *</label>
+                  <select required class="form-control" name="ladder_spacing" id="ladder-spacing-id" placeholder="Enter ladder spacing">
+                    <option value="">Choose ladder spacing</option>
+                  </select>
+                </div>
                 <div class="form-group">
                   <label for="ladder-spacing-id">Post Length *</label>
-                  <input type="text" required class="form-control" name="post_length" id="ladder-spacing-id" placeholder="Enter post length">
+                  <select required class="form-control" name="post_length" id="master-post-length-id" placeholder="Enter post length">
+                    <option value="">Choose pick post length</option>
+                  </select>
                 </div>
                 <div class="form-group">
                   <label for="ladder-spacing-price-id">Post Length Price *</label>
                   <input type="number" required class="form-control" name="post_length_price" id="ladder-spacing-price-id" placeholder="Enter post length price">
                 </div>
                 <div class="form-group">
-                  <label for="ladder-spacing-price-id">Post Length Image *</label>
-                  <input type="file" required class="form-control" name="post_length_file" id="ladder-spacing-file-id" placeholder="Enter post length image">
+                  <label for="ladder-spacing-price-id">Post Length Image </label>
+                  <input type="file" class="form-control" name="post_length_file" id="ladder-spacing-file-id" placeholder="Enter post length image">
                   <div class="pick-overhead-img">
                   
                   </div>
@@ -105,6 +132,7 @@
 
     $(function(){
         show_piller_posts_table();
+        load_overhead_shades_fx();
         $("#add-master-height-id").click(function(){
           $("#edit-pick-overhead-shades-form-head-id").html("Pick Post Length (Add Form)");
           $("#admin-submit-pick-overhead-shades-form-id").find('#ladder-spacing-id').val("");
@@ -144,6 +172,79 @@
 
             }
         })
+    }
+
+    function master_width_onchange()
+    {
+      var w_id = $("#master-width-id").val();
+      var h_id = $("#master-height-id").val();
+      var p_id = $("#master-post-id").val();
+      if(w_id != "" && w_id != null && h_id != "" && h_id != null && (p_id == null || p_id == ""))
+      {
+        $.ajax({
+          url: "{{ route('admin.pick-overhead-shades-post-first-load') }}",
+          type: "GET",
+          data: {w_id: w_id, h_id: h_id},
+          dataType: 'json',
+          success: function(event){
+            $("#master-post-id").html(event.master_posts);
+          }, error: function(event){
+
+          }
+        });
+      }
+      else if(w_id != "" && w_id != null && h_id != "" && h_id != null && p_id != null && p_id != "")
+      {
+        $.ajax({
+          url: "{{ route('admin.pick-overhead-shades-post-first-load') }}",
+          type: "GET",
+          data: {w_id: w_id, h_id: h_id, p_id: p_id},
+          dataType: 'json',
+          success: function(event){
+            $("#ladder-spacing-id").html(event.master_overhead_shades);
+          }, error: function(event){
+
+          }
+        });
+      }
+      else
+      {
+        $("#master-post-id").html('<option value="">Choose master posts</option>');
+        $("#ladder-spacing-id").html('<option value="">Choose ladder spacing</option>');
+      }
+      
+    }
+
+    function load_master_post_length_fx()
+    {
+      $.ajax({
+        url: "{{ route('admin.pick-master-post-length-height-width-first-load') }}",
+        type: "GET",
+        dataType: "json",
+        success: function(event){
+          $("#master-post-length-id").html(event.master_post_length_data);
+        }, error: function(event){
+
+        }
+      })
+    }
+
+
+
+    function load_overhead_shades_fx()
+    {
+      $.ajax({
+        url: "{{ route('admin.pick-overhead-shades-height-width-first-load') }}",
+        type: "GET",
+        dataType: "json",
+        success: function(event){
+          $("#master-height-id").html(event.master_height);
+          $("#master-width-id").html(event.master_width);
+          load_master_post_length_fx();
+        }, error: function(event){
+
+        }
+      })
     }
 
     function make_btn_change(state, id)
@@ -232,6 +333,11 @@
                 $("#admin-submit-pick-overhead-shades-form-id").find('#ladder-spacing-id').val(event.name_type);
                 $("#admin-submit-pick-overhead-shades-form-id").find('#ladder-spacing-price-id').val(event.price_details);
                 $("#admin-submit-pick-overhead-shades-form-id").find('#ladder-spacing-file-id').removeAttr("required");
+                $("#master-height-id").html(event.master_height);
+                $("#master-width-id").html(event.master_width);
+                $("#ladder-spacing-id").html(event.master_overhead_shades);
+                $("#master-post-id").html(event.master_posts);
+                $("#master-post-length-id").html(event.master_post_length_data)
                 $(".pick-overhead-img").show();
                 $(".pick-overhead-img").html(event.img_details);
                 $("#admin-submit-pick-overhead-shades-form-id").attr("action",url_id);

@@ -299,6 +299,10 @@
                 $("#admin-submit-pick-overhead-shades-form-id").find('#ladder-spacing-id').val(event.name_type);
                 $("#admin-submit-pick-overhead-shades-form-id").find('#ladder-spacing-price-id').val(event.price_details);
                 $("#admin-submit-pick-overhead-shades-form-id").find('#ladder-spacing-file-id').removeAttr("required");
+                $("#master-height-id").html(event.master_height);
+                $("#master-width-id").html(event.master_width);
+                $("#ladder-spacing-id").html(event.master_overhead);
+                $("#master-post-id").html(event.master_posts);
                 $(".pick-overhead-img").show();
                 $(".pick-overhead-img").html(event.img_details);
                 $("#admin-submit-pick-overhead-shades-form-id").attr("action",url_id);

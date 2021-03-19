@@ -18,6 +18,10 @@ use App\Model\Admin\PickLouveredPanel\PickLouveredPanelModel;
 use App\Model\Admin\PickOverheadShades\PickOverheadShadesModel;
 use App\Model\Admin\PickPostMountBracket\PickPostMountBracketModel;
 
+use App\Model\Admin\CombinationModel\CombinationModel;
+use App\Model\Admin\MasterPostLength\MasterPostLengthModel;
+use App\Model\Admin\MasterOverheadModel;
+
 class SendMailCOntroller extends Controller
 {
     public function index(Request $request)
@@ -44,14 +48,14 @@ class SendMailCOntroller extends Controller
             }
 
             // overhead shades query
-            $getOverheadShadesQuery = PickOverheadShadesModel::where('id',$mQuery->final_overhead)->get();
+            $getOverheadShadesQuery = MasterOverheadModel::where('id',$mQuery->final_overhead)->get();
             foreach($getOverheadShadesQuery as $getOverHead)
             {
                 $data['overhead_shades'] = $getOverHead->img_standard_name;
             }
 
             // piller post query
-            $PillerPostModelQuery = PickPostLengthModel::where('id',$mQuery->final_post_length)->get();
+            $PillerPostModelQuery = MasterPostLengthModel::where('id',$mQuery->final_post_length)->get();
             foreach($PillerPostModelQuery as $getP)
             {
                 $data['piller_length'] = $getP->posts_length;

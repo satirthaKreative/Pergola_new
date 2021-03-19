@@ -34,17 +34,16 @@
                 <thead>
                   <tr>
                     <th>ID</th>
-                    <th>Images</th>
+                    <th>Final Product Image</th>
+                    <th>Final Footprint Image</th>
                     <th>Combination Types</th>
-                    <th>Post Length</th>
-                    <th>Overhead Shades</th>
                     <th>Status</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody id="campaign-tbl-id">
                   <tr>
-                    <td colspan="7"><center class="text-info"><i class="fa fa-spinner"></i> Loading data's</center></td>
+                    <td colspan="6"><center class="text-info"><i class="fa fa-spinner"></i> Loading data's</center></td>
                   </tr>
                 </tbody>
               </table>
@@ -70,21 +69,9 @@
             @csrf
               <div class="card-body">
                 <div class="form-group">
-                  <label for="posts-length-width-id">Posts, Length & Width</label>
-                  <select required class="form-control" name="post_length_width" id="posts-length-width-id">
+                  <label for="posts-length-width-id">Combination Panel</label>
+                  <select required class="form-control" name="post_length_width" id="combination-panel-id">
                     <option value="">Choose a combination</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="post-length-id">Post Length</label>
-                  <select required class="form-control" name="post_length" id="post-length-id">
-                    <option value="">Choose a post length</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="overhead-shades-id">Overhead Shades</label>
-                  <select required class="form-control" name="overhead_shades" id="overhead-shades-id">
-                    <option value="">Choose a overhead shades type</option>
                   </select>
                 </div>
                 <div class="form-group">
@@ -198,50 +185,19 @@
     // choose footprint
     function choose_footprint_fx()
     {
-        $.ajax({
-            url: "{{ route('admin.choose-footprint-final-product') }}",
-            type: "GET",
-            dataType: "json",
-            success: function(event){
-                $("#posts-length-width-id").html(event);
-                choose_post_length_fx();
-            }, error: function(event){
+      $.ajax({
+        url: "{{ route('admin.combination-panel-show') }}",
+        type: "GET",
+        dataType: "JSON",
+        success: function(event){
+          $("#combination-panel-id").html(event.combination_data);
+        }, error: function(event){
 
-            }
-        })
+        }
+      })
     }
     
 
-    // choose footprint
-    function choose_post_length_fx()
-    {
-        $.ajax({
-            url: "{{ route('admin.choose-post-length-final-product') }}",
-            type: "GET",
-            dataType: "json",
-            success: function(event){
-                $("#post-length-id").html(event);
-                choose_overhead_shades_fx();
-            }, error: function(event){
-
-            }
-        })
-    }
-
-      // choose footprint
-    function choose_overhead_shades_fx()
-    {
-        $.ajax({
-            url: "{{ route('admin.choose-overhead-shades-final-product') }}",
-            type: "GET",
-            dataType: "json",
-            success: function(event){
-                $("#overhead-shades-id").html(event);
-            }, error: function(event){
-
-            }
-        })
-    }
 
     // delete & edit & view-edit
     function make_del_change(id)
@@ -303,6 +259,7 @@
                 $("#add-edit-master-height-action-id").attr("action",url_id);
                 $("#add-edit-master-height-action-id").find('#final-product-img-id').removeAttr("required");
                 $("#add-edit-master-height-action-id").find('#final-footprint-img-id').removeAttr("required");
+                $("#combination-panel-id").html(event.combination_data);
                 $(".pick-overhead-img").show();
                 $(".pick-overhead-img").html(event.img_file_name);
                 $(".pick-footprint-img").show();

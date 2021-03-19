@@ -10,6 +10,6 @@ class FinalProductModel extends Model
     protected $table = "final_product_tbls";
 
     protected $fillable = [
-        'pick_footprint', 'overhead_shades', 'post_length', 'final_product_img', 'final_footprint_img', 'admin_action', 'created_at', 'updated_at'
+        'pick_footprint', 'final_product_img', 'final_footprint_img', 'admin_action', 'created_at', 'updated_at'
     ];
 }

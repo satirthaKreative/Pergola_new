@@ -20,6 +20,9 @@ use App\Model\Front\Billing_Model;
 use App\Model\Front\Shipping_Model;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BillingMail;
+use App\Model\Admin\CombinationModel\CombinationModel;
+use App\Model\Admin\MasterPostLength\MasterPostLengthModel;
+use App\Model\Admin\MasterOverheadModel;
 
 
 class BackToHomeController extends Controller
@@ -359,5 +362,298 @@ class BackToHomeController extends Controller
 
             echo json_encode($html);
         }
+    }
+
+    /// back to home page session query
+    public function backingRequestQuery(Request $request)
+    {
+        if($request->session()->has('main_unique_session_key'))
+        {
+            $get_session_data = $request->session()->get('main_unique_session_key');
+        }
+
+
+        $mainQuery = BeforeCheckoutFinalProductModel::where('unique_session_id',$get_session_data)->get();
+        foreach($mainQuery as $mQuery)
+        {
+            $masterWidth = $mQuery->final_width;
+            $masterHeight = $mQuery->final_length;
+            $masterPost = $mQuery->final_no_posts;
+
+
+            // first page 
+            $choose_post_type_query = PickUpFootPrintModel::where(['height_master' => $masterHeight, 'width_master' => $masterWidth ])->get();
+            $array_post_names = array();
+            foreach($choose_post_type_query as $choosePostTypeQ)
+            {
+                $array_post_names[] = $choosePostTypeQ->posts_master;
+            }
+            
+            $mainPostQuery = PillerPostModel::whereIn('id',$array_post_names)->get();
+
+            
+                $html['main_posts'] = '<option value="">Choose posts</option>';
+                if(count($mainPostQuery) > 0)
+                {
+                    foreach($mainPostQuery as $pQuery)
+                    {
+                        $checked = "";
+                        if($pQuery->id == $masterPost)
+                        {
+                            $checked = "checked";
+                        }
+                        $html['main_posts'] .= '<option value='.$pQuery->id.' '.$checked.'>'.$pQuery->no_of_posts.' posts</option>';
+                    }
+                }
+
+            $getting_first_page_image_price_query = PickUpFootPrintModel::where(['height_master' => $masterHeight, 'width_master' => $masterWidth, 'posts_master' => $masterPost])->get();
+            foreach($getting_first_page_image_price_query as $gTQuery1)
+            {
+                $html['master_price'] = $gTQuery1->price_master;
+                $html['master_img'] = '';
+                        if($gTQuery1->img_master != "" || $gTQuery1->img_master != null)
+                        {
+                            $html['master_img'] = '<img src="'.str_replace("public","storage/app/public",asset($gTQuery1->img_master)).'" src="no image" />';
+                        }
+                        else if($gTQuery1->img_master == "" || $gTQuery1->img_master == null)
+                        {
+                            $html['master_img'] = '';
+                        }
+            }
+
+            // end of first page
+
+            // second page
+            $secondPageData = PickOverheadShadesModel::where(['master_width' => $masterWidth, 'master_height' => $masterHeight, 'master_post' => $masterPost])->get();
+            $html['overhead_types'] = "<option value=''>Choose a overhead shades</option>";
+            foreach($secondPageData as $secondQuery)
+            {
+                $checked = "";
+                if($secondQuery->id == $mQuery->final_overhead)
+                {
+                    $checked = "checked";
+                }
+                $html['overhead_types'] .= "<option value=".$secondQuery->master_overhead_shades." ".$checked.">".$secondQuery->img_standard_name."</option>";
+            }
+
+            $getting_second_page_image_price_query = PickOverheadShadesModel::where(['master_width' => $masterWidth, 'master_height' => $masterHeight, 'master_post' => $masterPost, 'master_overhead_shades' => $mQuery->final_overhead])->get();
+            foreach($getting_second_page_image_price_query as $gTQuery2)
+            {
+                $html['master_overhead_price'] = $gTQuery2->price_details;
+                $html['master_overhead_img'] = '';
+                        if($gTQuery2->img_master != "" || $gTQuery2->img_master != null)
+                        {
+                            $html['master_overhead_img'] = '<img src="'.str_replace("public","storage/app/public",asset($gTQuery2->img_master)).'" src="no image" />';
+                        }
+                        else if($gTQuery2->img_master == "" || $gTQuery2->img_master == null)
+                        {
+                            $html['master_overhead_img'] = '';
+                        }
+            }
+
+            // third page
+            $mainVideoQuery = Video3DModel::where(['master_width' => $masterWidth , 'master_height' => $masterHeight, 'master_posts' => $masterPost , 'master_overhead' => $mQuery->final_overhead ])->get();
+        
+       
+            if(count($mainVideoQuery) > 0)
+            {
+                $i = 0;
+                foreach($mainVideoQuery as $mQuery)
+                {
+                    if($mQuery->master_3D_video != "" || $mQuery->master_3D_video != null)
+                    {
+                        $html['video_data'] = $mQuery->master_3D_video;
+                    }
+                    else
+                    {
+                        $html['video_data'] = "";
+                    }
+                    
+                }
+            }
+            else
+            {
+                $html['video_data'] = "";
+            } 
+
+            /// fourth page
+            $choosePostLengthQuery = PickPostLengthModel::where(['master_width' =>  $masterWidth, 'master_height' => $masterHeight, 'master_post' => $masterPost, 'master_overhead_shades' => $mQuery->final_overhead ])->get();
+            $html['master_post_length'] = '<option value="">Choose a post length</option>';
+            if(count($choosePostLengthQuery) > 0)
+            {
+                foreach($choosePostLengthQuery as $cQuery)
+                {    
+                    $checked = "";
+                    if($cQuery->id == $mQuery->final_post_length)
+                    {
+                        $checked = "checked";
+                    }
+                    $fetchTheFinalOne = MasterPostLengthModel::where(['id' => $cQuery->posts_length])->get();
+                    foreach($fetchTheFinalOne as $fQueryLenght)
+                    {
+                        $html['master_post_length'] .= '<option value='.$fQueryLenght->id.' '.$checked.'>'.$fQueryLenght->master_post_length.' ft.</option>';
+                    }
+                }
+            }
+
+            $getting_fifth_page_image_price_query = PickPostLengthModel::where(['master_width' =>  $masterWidth, 'master_height' => $masterHeight, 'master_post' => $masterPost, 'master_overhead_shades' => $mQuery->final_overhead, 'posts_length' => $mQuery->final_post_length ])->get();
+            foreach($getting_fifth_page_image_price_query as $gTQuery5)
+            {
+                $html['master_post_length_price'] = $gTQuery5->price_details;
+                $html['master_post_length_img'] = '';
+                        if($gTQuery5->img_master != "" || $gTQuery5->img_master != null)
+                        {
+                            $html['master_post_length_img'] = '<img src="'.str_replace("public","storage/app/public",asset($gTQuery5->img_master)).'" src="no image" />';
+                        }
+                        else if($gTQuery5->img_master == "" || $gTQuery5->img_master == null)
+                        {
+                            $html['master_post_length_img'] = '';
+                        }
+            }
+
+            // fifth page
+            $chooseSlapQuery = PickPostLengthModel::where(['master_width' =>  $masterWidth, 'master_height' => $masterHeight, 'master_post' => $masterPost, 'master_overhead_shades' => $mQuery->final_overhead, 'posts_length' => $mQuery->final_post_length ])->get();
+            $html['choose_pick_slap_html'] = '<option value="">Choose a pick slap</option>';
+            if(count($chooseSlapQuery) > 0)
+            {
+                $checked = "";
+
+                
+                    
+                foreach($chooseSlapQuery as $cQuery)
+                {    
+                    $html['show_slap_type'] = $cQuery->final_post_mount_type;
+                    $html['show_slap_name_price'] = $cQuery->final_post_mount;
+                    $chooseMainQuery = CombinationModel::where('combination_id',$cQuery->id)->get();
+
+                    foreach($chooseMainQuery as $cQuery1)
+                    {
+                        $html['choose_pick_slap_html']  .= '<option value='.$cQuery1->new_price.'>New Price</option>';
+                        $html['choose_pick_slap_html']  .= '<option value='.$cQuery1->existing_price.'>Existing Price</option>';
+                    }
+
+                    
+                }
+            }
+
+            // sixth page
+            $chooseCanopySessionQuery = PickPostLengthModel::where(['master_width' =>  $masterWidth, 'master_height' => $masterHeight, 'master_post' => $masterPost, 'master_overhead_shades' => $mQuery->final_overhead, 'posts_length' => $mQuery->final_post_length ])->get();
+            $html['canopy_session_name'] = '';
+            if(count($chooseCanopySessionQuery) > 0)
+            {
+                $checked = "";
+                    
+                foreach($chooseCanopySessionQuery as $cQuery)
+                {    
+                    $html['show_canopy_type'] = $cQuery->final_canopy_type;
+                    $html['show_canopy_name_price'] = $cQuery->final_canopy;
+                    $chooseMainQuery = CombinationModel::where('combination_id',$cQuery->id)->get();
+
+                    foreach($chooseMainQuery as $cQuery1)
+                    {
+                        $html['canopy_session_name'] .= '<p>'.ucwords($cQuery1->canopy_list).'</p>
+                        <p>Note: '.$cQuery1->canopy_list.'</p>
+                        <input type="hidden" name="" id="sixth-pregenerated-price-hidden-val-id" value="'.$cQuery1->canopy_price.'" />
+                        <h4>Price <span>$<span id="sixth-price-panel-id">'.$cQuery1->canopy_price.'</span></span></h4>';
+                    }
+
+                }
+            }
+
+            // seventh page
+            $chooseLpanelQuery = PickPostLengthModel::where(['master_width' =>  $masterWidth, 'master_height' => $masterHeight, 'master_post' => $masterPost, 'master_overhead_shades' => $mQuery->final_overhead, 'posts_length' => $mQuery->final_post_length ])->get();
+            $html['lpanel_radio_panel'] = "";
+            if(count($chooseLpanelQuery) > 0)
+            {
+                $checked = "";
+                    
+                foreach($chooseLpanelQuery as $cQuery)
+                {    
+                    $html['show_lpanel_type'] = $cQuery->final_lpanel_type;
+                    $html['show_lpanel_name_price'] = $cQuery->final_lpanel;
+                    $chooseMainQuery = CombinationModel::where('combination_id',$cQuery->id)->get();
+                    
+                    
+
+                    foreach($chooseMainQuery as $cQuery1)
+                    {
+                        $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery1->left_price.'") > Left </li>';
+                        $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery1->rear_price.'") > Rear</li>';
+                        $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery1->right_price.'") > Right </li>';
+                        $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery1->left_rear_price.'") > Left + Rear</li>';
+                        $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery1->right_rear_price.'") > Right + Rear</li>';
+                        $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery1->left_right_rear_price.'") > Left + Right + Rear</li>';
+
+                        $html['new_price'] = $cQuery1->left_price;
+                    }
+
+                }
+            }
+
+
+            ///
+            $html['mount_new_panel_type'] = $mQuery->final_post_mount_type;
+            $html['canopy_panel_type'] = $mQuery->final_canopy_type;
+            $html['final_lpanel_type'] = $mQuery->final_lpanel_type;
+            $html['final_home_price_due'] = $mQuery->final_price;
+
+
+            /// final page product
+            $chooseLpanelQuery = PickPostLengthModel::where(['master_width' =>  $masterWidth, 'master_height' => $masterHeight, 'master_post' => $masterPost, 'master_overhead_shades' => $mQuery->final_overhead, 'posts_length' => $mQuery->final_post_length ])->get();
+            $html['choose_final_product_details'] = "";
+            foreach($chooseLpanelQuery as $cHLPQuery)
+            {
+                $piller_count_query = PillerPostModel::where('id',$cHLPQuery->final_no_posts)->get();
+                foreach($piller_count_query as $pillerQuery)
+                {
+                    $html['posts_no3'] = $pillerQuery->no_of_posts;
+                }
+
+                $master_width_query = MasterWidthModel::where('id',$cHLPQuery->final_no_posts)->get();
+                foreach($master_width_query as $widthQuery)
+                {
+                    $html['width_data3'] = $widthQuery->master_width_length;
+                }
+
+                $master_height_query = MasterHeightModel::where('id',$cHLPQuery->final_no_posts)->get();
+                foreach($master_height_query as $heightQuery)
+                {
+                    $html['height_data3'] = $heightQuery->master_height_length;
+                }
+
+                $master_final_product_page_query = FinalProductModel::where('pick_footprint',$cHLPQuery->final_product_id)->get();
+                if(count($master_final_product_page_query) > 0)
+                {
+                    foreach($master_final_product_page_query as $finalPQuery)
+                    {
+                        $html['final_prod_img3'] = "";
+                        $html['final_footprint_img3'] = "";
+                        if($finalPQuery->final_product_img != "" || $finalPQuery->final_product_img != null){
+                            $html['final_prod_img3'] = '<img src="'.str_replace('public','storage/app/public',asset($finalPQuery->final_product_img)).'"  alt=""/>';
+                        }
+                        if($finalPQuery->final_footprint_img != "" || $finalPQuery->final_footprint_img != null){
+                            $html['final_footprint_img3'] = '<img src="'.str_replace('public','storage/app/public',asset($finalPQuery->final_footprint_img)).'"  alt=""/>';
+                        }
+                    }
+                }
+
+                $post_length_query = MasterPostLengthModel::where('id',$cHLPQuery->final_product_id)->get();
+                foreach($post_length_query as $pQuery)
+                {
+                    $html['length_data3'] = $pQuery->master_post_length;
+                }
+
+                $overhead_query = MasterOverheadModel::where('id',$cHLPQuery->final_product_id)->get();
+                foreach($overhead_query as $pOverQuery)
+                {
+                    $html['overhead_data3'] = $pOverQuery->overhead_shades_val;
+                }
+            }
+
+            
+
+        }
+
+        echo json_encode($html);
     }
 }

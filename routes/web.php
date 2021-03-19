@@ -75,6 +75,14 @@ Route::group(['prefix' => 'admin'], function(){
 			Route::get('/master-overhead-shades-action-get-edit','Admin\Dashboard\MasterOverheadShades\MasterOverShadeController@showEditP')->name('admin.master-overhead-shades-action-get-edit');
 			Route::post('/master-overhead-shades-action-edit/{my_data}','Admin\Dashboard\MasterOverheadShades\MasterOverShadeController@updateP')->name('admin.master-overhead-shades-action-edit');
 			Route::get('/master-overhead-shades-action-del','Admin\Dashboard\MasterOverheadShades\MasterOverShadeController@removeP')->name('admin.master-overhead-shades-action-del');
+			// master post length
+			Route::get('/master-post-length','Admin\Dashboard\MasterPostLength\MasterPostLengthController@index')->name('admin.master-post-length-show');
+			Route::get('/master-post-length-show','Admin\Dashboard\MasterPostLength\MasterPostLengthController@showP')->name('admin.master-post-length-show-actual-data');
+			Route::post('/master-post-length-add','Admin\Dashboard\MasterPostLength\MasterPostLengthController@addP')->name('admin.master-post-length-show-actual-submit');
+			Route::get('/master-post-length-action-change-show','Admin\Dashboard\MasterPostLength\MasterPostLengthController@actionP')->name('admin.master-post-length-show-action-change-data');
+			Route::get('/master-post-length-action-get-edit','Admin\Dashboard\MasterPostLength\MasterPostLengthController@showEditP')->name('admin.master-post-length-action-get-edit');
+			Route::post('/master-post-length-action-edit/{my_data}','Admin\Dashboard\MasterPostLength\MasterPostLengthController@updateP')->name('admin.master-post-length-action-edit');
+			Route::get('/master-post-length-action-del','Admin\Dashboard\MasterPostLength\MasterPostLengthController@removeP')->name('admin.master-post-length-action-del');
 			// posts
 			Route::get('/add-posts','Admin\Dashboard\PillerPost\PillerPostController@showPage')->name('admin.add-posts');
 			Route::get('/admin-submit-piller-posts','Admin\Dashboard\PillerPost\PillerPostController@submitPiller')->name('admin.submit-piller-posts');
@@ -104,7 +112,9 @@ Route::group(['prefix' => 'admin'], function(){
 			Route::get('/del-action-data-for-3D-view','Admin\Dashboard\Video3D\Video3DController@delActionFx')->name('admin.del-action-data-for-3D-view');
 			Route::get('/edit-view-action-data-for-3D-view','Admin\Dashboard\Video3D\Video3DController@editViewChangeActionFx')->name('admin.edit-view-action-data-for-3D-view');
 			Route::post('/edit-action-data-for-3D-view/{id}','Admin\Dashboard\Video3D\Video3DController@editActionFx')->name('admin.edit-action-data-for-3D-view');
-			// Pick Post Length
+			// Pick Post Length 
+			Route::get('/pick-master-post-length-height-width-first-load','Admin\Dashboard\PickPostLength\PickPostLengthController@showMasterPostLength')->name('admin.pick-master-post-length-height-width-first-load');
+
 			Route::get('/add-pick-post-length','Admin\Dashboard\PickPostLength\PickPostLengthController@showPage')->name('admin.add-pick-post-length');
 			Route::post('/admin-submit-pick-post-length','Admin\Dashboard\PickPostLength\PickPostLengthController@submitOverheadShades')->name('admin.submit-pick-post-length');
 			Route::get('/admin-show-pick-post-length','Admin\Dashboard\PickPostLength\PickPostLengthController@showOverheadShades')->name('admin.show-pick-post-length');
@@ -140,6 +150,16 @@ Route::group(['prefix' => 'admin'], function(){
 			Route::get('/admin-pick-panel-del','Admin\Dashboard\PickLouveredPanel\PickLouveredPanelController@changeActionDel')->name('admin.pick-panel-action-del');
 			Route::get('/admin-pick-panel-view-edit','Admin\Dashboard\PickLouveredPanel\PickLouveredPanelController@getActionEdit')->name('admin.pick-panel-action-view-edit');
 			Route::post('/admin-pick-panel-edit/{id}','Admin\Dashboard\PickLouveredPanel\PickLouveredPanelController@changeActionEdit')->name('admin.pick-panel-action-edit');
+			// combination panel
+			Route::get('/combination-panel','Admin\Dashboard\CombinationPanel\CombinationController@index')->name('admin.combination-panel');
+			Route::get('/combination-panel-show','Admin\Dashboard\CombinationPanel\CombinationController@showActualData')->name('admin.combination-panel-show');
+			Route::post('/combination-panel-add','Admin\Dashboard\CombinationPanel\CombinationController@addActualData')->name('admin.combination-panel-add');
+			Route::get('/combination-panel-show-tbl','Admin\Dashboard\CombinationPanel\CombinationController@show_l_panel_data_fx')->name('admin.combination-panel-show-tbl');
+			Route::get('/combination-panel-edit','Admin\Dashboard\CombinationPanel\CombinationController@edit_combination_panel')->name('admin.combination-panel-edit');
+			Route::post('/combination-panel-edit-submit/{my_data}','Admin\Dashboard\CombinationPanel\CombinationController@submit_combination_panel')->name('admin.combination-panel-edit-submit');
+			Route::get('/combination-panel-action-change','Admin\Dashboard\CombinationPanel\CombinationController@edit_combination_action_change')->name('admin.combination-panel-action-change');
+			Route::get('/combination-panel-del','Admin\Dashboard\CombinationPanel\CombinationController@del_combination_panel')->name('admin.combination-panel-del');
+
 			// Pick Final Product
 			Route::get('/add-final-product','Admin\Dashboard\FinalProduct\FinalProductController@showPage')->name('admin.add-final-product');
 			Route::post('/admin-submit-final-product','Admin\Dashboard\FinalProduct\FinalProductController@submitOverheadShades')->name('admin.submit-final-product');
@@ -228,6 +248,9 @@ Route::group(['prefix' => '/'], function(){
 	Route::get('back-to-home-page','Front\backtohome\BackToHomeController@index')->name('satirtha.backToHomePage');
 	Route::get('back-to-home-page-forget-session','Front\backtohome\BackToHomeController@forget_s_fx')->name('satirtha.forget-new-session-back-to-home');
 	Route::get('show-page-loading-after-back','Front\backtohome\BackToHomeController@showPageRequest')->name('satirtha.show-page-loading-after-back');
+
+	// back to home session panel show
+	Route::get('main_pass_load_back_home_panel_session','Front\backtohome\BackToHomeController@backingRequestQuery')->name('satirtha.main_pass_load_back_home_panel_session');
 
 	/// back to thank you
 	Route::get('/thank-you','Front\backtohome\BackToHomeController@show_thankyou_fx')->name('satirtha.show-thank-you-page');

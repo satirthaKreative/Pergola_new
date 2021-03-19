@@ -5,10 +5,15 @@ namespace App\Http\Controllers\Admin\Dashboard\FinalProduct;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Model\Admin\FinalProduct\FinalProductModel;
-use App\Model\Admin\PillerPost\PillerPostModel;
-use App\Model\Admin\PickUpFootPrint\PickUpFootPrintModel;
+use App\Model\Admin\CombinationModel\CombinationModel;
 use App\Model\Admin\PickOverheadShades\PickOverheadShadesModel;
+use App\Model\Admin\PickUpFootPrint\PickUpFootPrintModel;
 use App\Model\Admin\PickPostLength\PickPostLengthModel;
+use App\Model\Admin\MasterPostLength\MasterPostLengthModel;
+use App\Model\Admin\MasterHeight\MasterHeightModel;
+use App\Model\Admin\MasterWidth\MasterWidthModel;
+use App\Model\Admin\PillerPost\PillerPostModel;
+use App\Model\Admin\MasterOverheadModel;
 
 class FinalProductController extends Controller
 {
@@ -25,10 +30,10 @@ class FinalProductController extends Controller
 
     public function submitOverheadShades(Request $request)
     {
-        $checkQuery = FinalProductModel::where(['pick_footprint' => $request->input('post_length_width') , 'post_length' => $request->input('post_length') , 'overhead_shades' => $request->input('overhead_shades') ])->get();
+        $checkQuery = FinalProductModel::where(['pick_footprint' => $request->input('post_length_width')])->get();
         if(count($checkQuery) > 0)
         {
-            $request->session()->flash('error_msg', 'This post length already added before');
+            $request->session()->flash('error_msg', 'This combination already added before');
             return redirect()->back();
         }
         else
@@ -53,8 +58,6 @@ class FinalProductController extends Controller
 
                 $insertArr = [
                     'pick_footprint' => $request->input('post_length_width'), 
-                    'post_length' => $request->input('post_length'), 
-                    'overhead_shades' => $request->input('overhead_shades'),
                     'final_product_img' => $our_story_img,
                     'final_footprint_img' => $our_story_img2,
                     'admin_action' => 'yes', 
@@ -84,6 +87,45 @@ class FinalProductController extends Controller
             $i = 0;
             foreach($showQuery as $sQuery)
             {
+                $mainQuery = PickPostLengthModel::where('id',$sQuery->pick_footprint)->get();
+                if(count($mainQuery) > 0)
+                {
+                    foreach($mainQuery as $mQuery)
+                    {
+                        $heightQuery = MasterHeightModel::where(['id' => $mQuery->master_height])->get();
+                        foreach($heightQuery as $hQuery)
+                        {
+                            $mainHeight = $hQuery->master_height_length;
+                        }
+
+                        $widthQuery = MasterWidthModel::where(['id' => $mQuery->master_width])->get();
+                        foreach($widthQuery as $wQuery)
+                        {
+                            $mainWidth = $wQuery->master_width_length;
+                        }
+
+                        $postQuery = PillerPostModel::where(['id' => $mQuery->master_post])->get();
+                        foreach($postQuery as $pQuery)
+                        {
+                            $mainPost = $pQuery->no_of_posts;
+                        }
+
+                        $overHeadQuery = MasterOverheadModel::where(['id' => $mQuery->master_overhead_shades])->get();
+                        foreach($overHeadQuery as $ohQuery)
+                        {
+                            $mainOverhead = $ohQuery->overhead_shades_val;
+                        }
+
+                        $postLengthQuery = MasterPostLengthModel::where(['id' => $mQuery->posts_length])->get();
+                        foreach($postLengthQuery as $phQuery)
+                        {
+                            $mainPostLength = $phQuery->master_post_length;
+                        }
+                        $combination_html = $mainHeight." ft. height X ".$mainWidth." ft. width X ".$mainPost." post X ".$mainPostLength." L X ".$mainOverhead." Overhead Shades";
+                    }
+
+                
+                }
                 if($sQuery->admin_action == 'yes' )
                 {
                     $status = '<span class="text-success"><i class="fa fa-check"></i> Active</span>';
@@ -109,46 +151,28 @@ class FinalProductController extends Controller
                     $img_path = '<img src="'.asset($change_path).'" alt="no image" width="100px" />';
                 }
 
+                if($sQuery->final_footprint_img == "" || $sQuery->final_footprint_img == null)
+                {
+                    $img_path1 = "No Image";
+                }
+                else
+                {
+                    $change_path1 = str_replace('public','storage/app/public',$sQuery->final_footprint_img);
+                    $img_path1 = '<img src="'.asset($change_path1).'" alt="no image" width="100px" />';
+                }
+
                 $del_state = '<a href="javascript: ;" onclick=make_del_change('.$sQuery->id.') class="text-danger"><i class="fa fa-trash"></i></a>';
 
                 $edit_state = '<a href="javascript: ;" onclick=make_edit_change('.$sQuery->id.') class="text-info"><i class="fa fa-edit"></i></a>';
 
                 //
 
-                $mainQuery01 = PickUpFootPrintModel::where('id',$sQuery->pick_footprint)->get();
-                foreach($mainQuery01 as $mQuery01)
-                {
-                        $getQuery01 = PillerPostModel::where('id',$mQuery01->posts_master)->get();
-                        foreach($getQuery01 as $gQuery01)
-                        {
-                            $posts_no01 = $gQuery01->no_of_posts;
-                        }
-
-                        $combination_types_name = $mQuery01->height_master.' ft. height x '.$mQuery01->width_master.' ft. width ,'.$posts_no01.' posts ';
-                }
-
-                //
-
-                    $mainQuery02 = PickPostLengthModel::where('id',$sQuery->post_length)->get();
-                    foreach($mainQuery02 as $mQuery02)
-                    {
-                            $post_length_combination = $mQuery02->posts_length.' ft.';            
-                    }
-                
-                //
-
-                    $mainQuery03 = PickOverheadShadesModel::where('id',$sQuery->overhead_shades)->get();
-                    foreach($mainQuery03 as $mQuery03)
-                    {
-                            $overheadShades_combination = $mQuery03->img_standard_name;            
-                    }
                 
                 $html .= "<tr>
                             <td>".++$i."</td>
                             <td>".$img_path."</td>
-                            <td>".$combination_types_name."</td>
-                            <td>".$post_length_combination."</td>
-                            <td>".ucwords($overheadShades_combination)."</td>
+                            <td>".$img_path1."</td>
+                            <td>".$combination_html."</td>
                             <td>".$status."</td>
                             <td>".$action_btn." ".$del_state." ".$edit_state."</td>
                         </tr>";
@@ -157,7 +181,7 @@ class FinalProductController extends Controller
         else
         {
             $html = '<tr>
-                        <td colspan="5"><center class="text-danger"><i class="fa fa-times"></i> No Data</center></td>
+                        <td colspan="6"><center class="text-danger"><i class="fa fa-times"></i> No Data</center></td>
                     </tr>';   
         }
 
@@ -260,60 +284,71 @@ class FinalProductController extends Controller
         foreach($changeQuery as $cData)
         {
             //
-            $html['img_file_name'] = '<img src="'.asset(str_replace('public','storage/app/public',$cData->final_product_img)).'" alt="no image" width="100px" />';
-            $html['footprint_file_name'] = '<img src="'.asset(str_replace('public','storage/app/public',$cData->final_footprint_img)).'" alt="no image" width="100px" />';
-            // 
-            $html['combination'] = '<option value="">Choose a combination</option>';
-            $mainQuery = PickUpFootPrintModel::get();
-            $i = 0;
-            $count = count($mainQuery);
-            foreach($mainQuery as $mQuery)
+            if($cData->final_product_img != null || $cData->final_product_img != "")
             {
-                    $getQuery = PillerPostModel::where('id',$mQuery->posts_master)->get();
-                    foreach($getQuery as $gQuery)
-                    {
-                        $posts_no = $gQuery->no_of_posts;
-                    }
-
-                    $sel_var = "";
+                $html['img_file_name'] = '<img src="'.asset(str_replace('public','storage/app/public',$cData->final_product_img)).'" alt="no image" width="100px" />';
+            }
+            else
+            {
+                $html['img_file_name'] = "No Image";
+            }
+            
+            if($cData->final_footprint_img != null || $cData->final_footprint_img != "")
+            {
+                $html['footprint_file_name'] = '<img src="'.asset(str_replace('public','storage/app/public',$cData->final_footprint_img)).'" alt="no image" width="100px" />';
+            }
+            else
+            {
+                $html['footprint_file_name'] = "No Image";
+            }
+            
+            $mainQuery = PickPostLengthModel::get();
+            if(count($mainQuery) > 0)
+            {
+                $html['combination_data'] = "<option value=''>choose combination</option>";
+                foreach($mainQuery as $mQuery)
+                {
+                    $selected = "";
                     if($mQuery->id == $cData->pick_footprint)
                     {
-                        $sel_var = "selected";
+                        $selected = "selected";
+                    }
+                    $heightQuery = MasterHeightModel::where(['id' => $mQuery->master_height])->get();
+                    foreach($heightQuery as $hQuery)
+                    {
+                        $mainHeight = $hQuery->master_height_length;
                     }
 
-                    $html['combination'] .= '<option value='.$mQuery->id.' '.$sel_var.'>'.$mQuery->height_master.' ft. height x '.$mQuery->width_master.' ft. width ,'.$posts_no.' posts </option>';
-                    $i++;
+                    $widthQuery = MasterWidthModel::where(['id' => $mQuery->master_width])->get();
+                    foreach($widthQuery as $wQuery)
+                    {
+                        $mainWidth = $wQuery->master_width_length;
+                    }
+
+                    $postQuery = PillerPostModel::where(['id' => $mQuery->master_post])->get();
+                    foreach($postQuery as $pQuery)
+                    {
+                        $mainPost = $pQuery->no_of_posts;
+                    }
+
+                    $overHeadQuery = MasterOverheadModel::where(['id' => $mQuery->master_overhead_shades])->get();
+                    foreach($overHeadQuery as $ohQuery)
+                    {
+                        $mainOverhead = $ohQuery->overhead_shades_val;
+                    }
+
+                    $postLengthQuery = MasterPostLengthModel::where(['id' => $mQuery->posts_length])->get();
+                    foreach($postLengthQuery as $phQuery)
+                    {
+                        $mainPostLength = $phQuery->master_post_length;
+                    }
+                    $html['combination_data'] .= "<option value='".$mQuery->id."' ".$selected." >".$mainHeight." ft. height X ".$mainWidth." ft. width X ".$mainPost." post X ".$mainPostLength." L X ".$mainOverhead." Overhead Shades</option>";
+                }
+
             
-                
             }
 
-            //
 
-            $html['post_length'] = '<option value="">Choose a post length</option>';
-            $mainQuery1 = PickPostLengthModel::get();
-            foreach($mainQuery1 as $mQuery1)
-            {
-                    $sel_var1 = "";
-                    if($mQuery1->id == $cData->post_length)
-                    {
-                        $sel_var1 = "selected";
-                    }
-                    $html['post_length'] .= '<option value='.$mQuery1->id.' '.$sel_var1.'>'.$mQuery1->posts_length.' ft.</option>';            
-            }
-
-            //
-
-            $html['img_standard'] = '<option value="">Choose a overhead shades type</option>';
-            $mainQuery2 = PickOverheadShadesModel::get();
-            foreach($mainQuery2 as $mQuery2)
-            {
-                    $sel_var2 = "";
-                    if($mQuery2->id == $cData->overhead_shades)
-                    {
-                        $sel_var2 = "selected";
-                    }
-                    $html['img_standard'] .= '<option value='.$mQuery2->id.' '.$sel_var2.'>'.$mQuery2->img_standard_name.'</option>';            
-            }
         }
 
         echo json_encode($html);
@@ -322,10 +357,10 @@ class FinalProductController extends Controller
     
     public function editActionFx(Request $request, $my_data)
     {
-        $checkQuery = FinalProductModel::where('id','!=',$my_data)->where(['pick_footprint' => $request->input('post_length_width') , 'post_length' => $request->input('post_length') , 'overhead_shades' => $request->input('overhead_shades') ])->get();
+        $checkQuery = FinalProductModel::where('id','!=',$my_data)->where(['pick_footprint' => $request->input('post_length_width') ])->get();
         if(count($checkQuery) > 0)
         {
-            $request->session()->flash('error_msg', 'This post length already added before');
+            $request->session()->flash('error_msg', 'This combination already added before');
             return redirect()->back();
         }
         else
@@ -336,8 +371,6 @@ class FinalProductController extends Controller
                     $our_story_img2 = $request->file('final_footprint_img')->store('public/final_imgs');
                     $insertArr = [
                         'pick_footprint' => $request->input('post_length_width'), 
-                        'post_length' => $request->input('post_length'), 
-                        'overhead_shades' => $request->input('overhead_shades'),
                         'final_product_img' => $our_story_img,
                         'final_footprint_img' => $our_story_img2,
                         'admin_action' => 'yes', 
@@ -351,8 +384,6 @@ class FinalProductController extends Controller
                     $our_story_img2 = $request->file('final_footprint_img')->store('public/final_imgs');
                     $insertArr = [
                         'pick_footprint' => $request->input('post_length_width'), 
-                        'post_length' => $request->input('post_length'), 
-                        'overhead_shades' => $request->input('overhead_shades'),
                         'final_product_img' => $our_story_img,
                         'admin_action' => 'yes', 
                         'updated_at' => date('Y-m-d H:i:s')
@@ -364,8 +395,6 @@ class FinalProductController extends Controller
                     $our_story_img2 = $request->file('final_footprint_img')->store('public/final_imgs');
                     $insertArr = [
                         'pick_footprint' => $request->input('post_length_width'), 
-                        'post_length' => $request->input('post_length'), 
-                        'overhead_shades' => $request->input('overhead_shades'),
                         'final_footprint_img' => $our_story_img2,
                         'admin_action' => 'yes', 
                         'updated_at' => date('Y-m-d H:i:s')
@@ -376,8 +405,6 @@ class FinalProductController extends Controller
                 {
                     $insertArr = [
                         'pick_footprint' => $request->input('post_length_width'), 
-                        'post_length' => $request->input('post_length'), 
-                        'overhead_shades' => $request->input('overhead_shades'),
                         'admin_action' => 'yes', 
                         'updated_at' => date('Y-m-d H:i:s')
                     ];

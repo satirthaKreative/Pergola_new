@@ -17,6 +17,9 @@ use App\Model\Admin\PickUpFootPrint\PickUpFootPrintModel;
 use App\Model\Admin\PickLouveredPanel\PickLouveredPanelModel;
 use App\Model\Admin\PickOverheadShades\PickOverheadShadesModel;
 use App\Model\Admin\PickPostMountBracket\PickPostMountBracketModel;
+use App\Model\Admin\CombinationModel\CombinationModel;
+use App\Model\Admin\MasterPostLength\MasterPostLengthModel;
+use App\Model\Admin\MasterOverheadModel;
 
 
 class BeforeCheckoutFinalProductController extends Controller
@@ -33,12 +36,13 @@ class BeforeCheckoutFinalProductController extends Controller
                 'final_overhead' => $_GET['overhead_type_val'], 
                 'final_post_length' => $_GET['post_length_val'], 
                 'final_post_mount_type' => $_GET['slap_mount_type'], 
-                'final_post_mount' => $_GET['mount_data'], 
+                'final_post_mount' => $_GET['mount_panel_hide_price'], 
                 'final_canopy_type' => $_GET['canopy_type_data'], 
-                'final_canopy' => 'yes', 
+                'final_canopy' => $_GET['canopy_price'], 
                 'final_lpanel_type' => $_GET['lpanel_val_type'], 
                 'final_lpanel' => $_GET['lpanel_main_data'], 
                 'final_price' => $_GET['total_price'],  
+                'final_product_id' => $request->session()->get('final_product_combination_session_id'),
                 'pay_status' => 'no', 
                 'admin_action' => 'yes', 
                 'created_at' => date('Y-m-d'), 
@@ -75,12 +79,13 @@ class BeforeCheckoutFinalProductController extends Controller
                     'final_overhead' => $_GET['overhead_type_val'], 
                     'final_post_length' => $_GET['post_length_val'], 
                     'final_post_mount_type' => $_GET['slap_mount_type'], 
-                    'final_post_mount' => $_GET['mount_data'], 
+                    'final_post_mount' => $_GET['mount_panel_hide_price'], 
                     'final_canopy_type' => $_GET['canopy_type_data'], 
-                    'final_canopy' => 'yes', 
+                    'final_canopy' => $_GET['canopy_price'], 
                     'final_lpanel_type' => $_GET['lpanel_val_type'], 
                     'final_lpanel' => $_GET['lpanel_main_data'], 
-                    'final_price' => $_GET['total_price'], 
+                    'final_price' => $_GET['total_price'],  
+                    'final_product_id' => $request->session()->get('final_product_combination_session_id'),
                     'unique_session_id' => $unique_id, 
                     'pay_status' => 'no', 
                     'admin_action' => 'yes', 
@@ -129,17 +134,17 @@ class BeforeCheckoutFinalProductController extends Controller
             }
 
             // overhead shades query
-            $getOverheadShadesQuery = PickOverheadShadesModel::where('id',$mQuery->final_overhead)->get();
+            $getOverheadShadesQuery = MasterOverheadModel::where('id',$mQuery->final_overhead)->get();
             foreach($getOverheadShadesQuery as $getOverHead)
             {
-                $data['overhead_shades'] = $getOverHead->img_standard_name;
+                $data['overhead_shades'] = $getOverHead->overhead_shades_val;
             }
 
             // piller post query
-            $PillerPostModelQuery = PickPostLengthModel::where('id',$mQuery->final_post_length)->get();
+            $PillerPostModelQuery = MasterPostLengthModel::where('id',$mQuery->final_post_length)->get();
             foreach($PillerPostModelQuery as $getP)
             {
-                $data['piller_length'] = $getP->posts_length;
+                $data['piller_length'] = $getP->master_post_length;
             }
 
             $data['mount_count'] = ucwords($mQuery->final_post_mount_type);
@@ -153,7 +158,7 @@ class BeforeCheckoutFinalProductController extends Controller
             $footprintQuery = PickUpFootPrintModel::where(['height_master' => $mQuery->final_length, 'width_master' => $mQuery->final_width, 'posts_master' =>  $mQuery->final_no_posts])->get();
             foreach($footprintQuery as $fQuery)
             {
-                $finalImgQuery = FinalProductModel::where(['pick_footprint' => $fQuery->id, 'overhead_shades' => $mQuery->final_overhead, 'post_length' => $mQuery->final_post_length])->get();
+                $finalImgQuery = FinalProductModel::where(['pick_footprint' => $fQuery->id])->get();
                 if(count($finalImgQuery) > 0)
                 {
                     foreach($finalImgQuery as $imgQ)

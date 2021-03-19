@@ -15,6 +15,7 @@ use App\Model\Admin\PickUpFootPrint\PickUpFootPrintModel;
 use App\Model\Admin\PickLouveredPanel\PickLouveredPanelModel;
 use App\Model\Admin\PickOverheadShades\PickOverheadShadesModel;
 use App\Model\Admin\PickPostMountBracket\PickPostMountBracketModel;
+use App\Model\Admin\MasterOverheadModel;
 
 
 class Video3DController extends Controller
@@ -101,7 +102,7 @@ class Video3DController extends Controller
         }
 
         // overhead shades
-        $masterOverheadShadesQuery = PickOverheadShadesModel::where('admin_action','yes')->get();
+        $masterOverheadShadesQuery = MasterOverheadModel::where('admin_action','yes')->get();
         $html['master_overhead_query'] = "<option value=''>Choose Overhead Shades</option>";
         if(count($masterOverheadShadesQuery) > 0)
         {    
@@ -117,7 +118,7 @@ class Video3DController extends Controller
                         $selected = "selected";
                     }
                     
-                    $html['master_overhead_query'] .= '<option value="'.$mOVQuery->id.'" '.$selected.'>'.$mOVQuery->img_standard_name.'</option>';
+                    $html['master_overhead_query'] .= '<option value="'.$mOVQuery->id.'" '.$selected.'>'.$mOVQuery->overhead_shades_val.'</option>';
                 }
                 
             }

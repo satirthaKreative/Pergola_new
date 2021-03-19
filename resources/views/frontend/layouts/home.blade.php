@@ -32,6 +32,7 @@
            </div>
            <div class="col-lg-6">
              <h3>Pick a Footprint (outside post to post)</h3>
+             <input type="hidden" name="pick_footprint_hide_data_change_panel" id="pick_footprint_hide_data_change_panel" value="0" />
              <label for="">Width (In Feet) *</label>
              <select name="" id="master-home-width-id" onchange="master_home_width_fx()">
                <option value="">Choose a width</option>
@@ -69,6 +70,7 @@
              <h2>Custom Pergola Builder</h2>             
            </div>
            <div class="col-lg-6">
+            <input type="hidden" name="pick_overhead_shades_hide_data_change_panel" id="pick_overhead_shades_hide_data_change_panel" value="0" />
              <h3>Pick Overhead Shades</h3>
              <label for="">Ladder Spacing *</label>
              <select name="" id="ladder-overhead-datas-show-id" onchange="overhead_shades2_change_fx()">
@@ -112,6 +114,7 @@
            </div>
            <div class="col-lg-6">
              <h3>Pick Post Length</h3>
+             <input type="hidden" name="pick_post_length_hide_data_change_panel" id="pick_post_length_hide_data_change_panel" value="0" />
              <label for="">Post Length (In Feet )*</label>
              <select name="" id="fourth-page-post-length-id" onchange="choose_fourth_page_data_fx4()">
                <option value="">Choose a post length</option>
@@ -154,7 +157,8 @@
                   <option value="">Choose a pick slap</option>
                 </select>
              </div>  
-             <input type="hidden" name="" id="fifth-page-price-hidden-id" value="">
+             <input type="hidden" name="" id="fifth-page-price-hidden-id" value="" />
+             <input type="hidden" id="mount-hidden-panel-price-new-id" value="0">
              <h4>Price <span>$<span id="fifth-price-panel-id">0</span></span></h4>
              <table>
                <tr>
@@ -172,6 +176,7 @@
            <div class="offset-lg-3 col-lg-6 text-center">
              <h2>Custom Pergola Builder</h2>  
              <h6>Pick Retactable Canopy</h6> 
+             
              <ul class="Canopy1 checking-radio-panel-of-canopy-class">
              <input type="hidden" id="canopy_answer_hidden_id" name="canopy_answer_hidden" value="no">
                <li>
@@ -214,7 +219,9 @@
 
               <ul class="Canopy2 checking-radio-panel-of-lpanel2-class">
                
-             </ul>            
+             </ul> 
+
+             <input type="hidden" id="lpanel-hide-radio-btn-panel-price-id" val="0" />           
              <h4>Price <span>$<span id="lpanel-wish-price-id">0</span></span></h4>
              <table>
                <tr>
@@ -382,147 +389,81 @@ $(function(){
   show_page_loading_after_back_fx();
   function show_page_loading_after_back_fx()
   {
+    
     $.ajax({
-      url: "{{ route('satirtha.show-page-loading-after-back') }}",
+      url: "{{ route('satirtha.main_pass_load_back_home_panel_session') }}",
       type: "GET",
       dataType: "json",
       success: function(event){
-          $("#master-panel-price-id").html(event.master_price);
-          $("#first-page-price-hidden-id").val(event.master_price);
-          $("#master-img-panel-page1-id").html(event.master_img);
-          $("#ladder-overhead-datas-show-id").html(event.overhead_types);
-          $("#fourth-page-post-length-id").html(event.post_length);
-          
+        $("#master-home-post-id").html(event.main_posts);
 
-          // second page
-          var first_price = $("#first-page-price-hidden-id").val();
-          var second_price = event.second_page_price;
-          var second_total_page = parseInt(first_price) + parseInt(second_price);
-          $("#second-page-price-hidden-id").val(second_total_page);
-          $("#second-price-panel-id").html(second_total_page);
-          $("#second-image-panel-id").html(event.master_second_img);
+        $("#master-panel-price-id").html(event.master_price);
+        $("#first-page-price-hidden-id").val(event.master_price);
+        $("#master-img-panel-page1-id").html(event.master_img);
 
-          // third page
-          var second_hide_price = $("#second-page-price-hidden-id").val();
-          var third_price = event.third_page_price;
-          var third_total_page = parseInt(third_price) + parseInt(second_hide_price);
-          $("#fourth-page-price-hidden-id").val(third_total_page);
-          $("#fourth-price-panel-id").html(third_price);
-          $("#fourth-total-price-panel-id").html(third_total_page);
-          $("#fourth-img-panel-view-id").html(event.master_third_img);
 
-          // fifth page
-          if(event.pick_post_mount_status == 'yes')
-          {
-            $("#mount_answer_hidden_id").val("yes");
-            var fourth_hidden_price = $("#fourth-page-price-hidden-id").val();
-            var fifth_page_price = event.pick_post_mount_price;
-            var fifth_final_page_price = parseInt(fourth_hidden_price) + parseInt(fifth_page_price);
-            $(".pick-slap-select-panel-class").css("display","block");
-            $("#fifth-page-price-hidden-id").val(fifth_final_page_price);
-            $("#fifth-price-panel-id").html(fifth_page_price);
-            $("#fifth-total-price-panel-id").html(fifth_final_page_price);
-            $("#pick-slap-mount-panel-load-id").html(event.pick_post_mount);
-          }
-          else if(event.pick_post_mount_status == 'no')
-          {
+        $("#ladder-overhead-datas-show-id").html(event.overhead_types);
+        var first_price11 = $("#first-page-price-hidden-id").val();
+        var second_price12 = parseInt(first_price11) + parseInt(event.master_overhead_price);
+        $("#second-page-price-hidden-id").val(second_price12);
+        $("#second-price-panel-id").html(second_price12);
 
-          }
 
-          // sixth page
-          if(event.pick_canopy_status == 'yes')
-          {
-            var six_final_page_price = parseInt($("#fifth-page-price-hidden-id").val()) + parseInt(event.price_canopy);
-            $("#canopy_answer_hidden_id").val("yes");
-            $(".canopy-note-select-panel-class").css("display","block");
-            $(".canopy-note-select-panel-class").html(event.pick_canopy_mount);
-            $("#sixth-panel-price-hidden-id").val(six_final_page_price);
-            $("#sixth-total-price-panel-id").html(six_final_page_price);
-          }
-          else if(event.pick_canopy_status == 'no')
-          {
+        $("#new-custom-third-val-id").find("#3dviewerplayer").attr('src',event.video_data);
 
-          }
+        $("#fourth-page-post-length-id").html(event.master_post_length);
+        $("#fourth-price-panel-id").html(event.master_post_length);
+        var second_price42 = parseInt(event.fourth_price) + parseInt(second_price12);
+        $("#fourth-img-panel-view-id").html(event.master_post_length_img);
 
-          // seventh page
-          if(event.pick_lpanel_status == "yes")
-          {
-            var seventh_price_session_price = parseInt(event.new_price)+parseInt($("#sixth-panel-price-hidden-id").val());
-            $("#lpanel_answer_hidden_id").val("yes");
-            $(".checking-radio-panel-of-lpanel2-class").css("display","block");
-            $(".checking-radio-panel-of-lpanel2-class").html(event.lpanel_radio_panel);
-            $("#lpanel-wish-price-id").html(event.new_price);
-            $("#seventh-total-price-panel-id").html(seventh_price_session_price);
-            $("#seventh-panel-price-hidden-id").val(seventh_price_session_price);
-          }
-          else if(event.pick_lpanel_status == "no")
-          {
+        $("#fourth-total-price-panel-id").html(second_price42);
+        $("#fourth-page-price-hidden-id").val(second_price42);
 
-          }
-
-          $("#final-product-width").html(event.final_main_width);
-          $("#final-product-length").html(event.final_main_height);
-          $("#seventh-total-price-panel-id").html(event.final_main_product_price);
-          $("#seventh-panel-price-hidden-id").val(event.final_main_product_price);
-          $("#final-product-total-price-id").html(event.final_main_product_price);
-          var master_width = $("#master-home-width-id").val();
-          var master_height = $("#master-home-height-id").val();
-          var master_post = $("#master-home-post-id").val();
-          var overhead_type_val = $("#ladder-overhead-datas-show-id").val();
-          var post_length_val = $("#fourth-page-post-length-id").val();
-          var slap_panel_val_type = $("#mount_answer_hidden_id").val();
         
-          if(slap_panel_val_type == "no" || slap_panel_val_type ==  "" || slap_panel_val_type ==  null || slap_panel_val_type ==  "undefined")
-          {
-            var slap_new_details = "no";
-          }
-          else if(slap_panel_val_type == "yes")
-          {
-            var slap_new_details = "yes";
-          }
-          
-          var canopy_val_type = $("#canopy_answer_hidden_id").val();
-          if(canopy_val_type == "no" || canopy_val_type ==  "" || canopy_val_type ==  null || canopy_val_type ==  "undefined")
-          {
-            var canopy_val_details = "no";
-          }
-          else if(canopy_val_type == "yes")
-          {
-            var canopy_val_details = "yes";
-          }
-          
-          var lpanel_val_type = $(".checking-radio-panel-of-lpanel1-class input[type=radio]:checked").val();
-          if(lpanel_val_type == "no" || lpanel_val_type ==  "" || lpanel_val_type ==  null || lpanel_val_type ==  "undefined")
-          {
-            var lpanel_val_details = "no";
-          }
-          else if(lpanel_val_type == "yes")
-          {
-            var lpanel_val_details = "yes";
-          }
-          
 
-          $.ajax({
-            url: "{{ route('satirtha.show-final-page-data') }}",
-            type: "GET",
-            data: {master_width: master_width, master_height: master_height, master_post: master_post, overhead_type_val: overhead_type_val, post_length_val: post_length_val },
-            dataType: "json",
-            success: function(event){
-              
-              $("#final-product-post-length").html(event.length_data);
-              $("#final-product-overhead").html(event.overhead_data);
-              $(".final-product-img-final-class").html(event.final_prod_img);
-              $(".last-footprint-img-class").html(event.final_footprint_img);
-              $("#final-product-mount").html(slap_new_details);
-              $("#final-product-canopy").html(canopy_val_details);
-              $("#final-product-lpanel").html(lpanel_val_details);
 
-              
-            }, error: function(event){
-              
-            }
-          })
- 
+        if(event.show_slap_type == "yes")
+        {
+          $("#pick-slap-select-panel-class").css('display','block');
+          $("#pick-slap-mount-panel-load-id").html(event.canopy_session_name);
+        }
+        else
+        {
+          $("#pick-slap-select-panel-class").css('display','block');
+        }
+
+        if(event.show_canopy_type == "yes")
+        {
+          $("#pick-slap-select-panel-class").css('display','block');
+          $(".canopy-note-select-panel-class").html(event.canopy_session_name);
+        }
+        else
+        {
+          $(".canopy-note-select-panel-class").css('display','none');
+        }
+
+        if(event.show_canopy_type == "yes")
+        {
+          $(".checking-radio-panel-of-lpanel2-class").css('display','block');
+          $(".checking-radio-panel-of-lpanel2-class").html(event.lpanel_radio_panel);
+        }
+        else
+        {
+          $(".checking-radio-panel-of-lpanel2-class").css('display','none');
+        }
+
+
+        $("#final-product-width").html(event.width_data3);
+        $("#final-product-length").html(event.height_data3);
+        $("#final-product-post-length").html(event.length_data3);
+        $("#final-product-overhead").html(event.overhead_data3);
+        $(".final-product-img-final-class").html(event.final_prod_img3);
+        $(".last-footprint-img-class").html(event.final_footprint_img3);
+        $("#final-product-mount").html(event.mount_new_panel_type);
+        $("#final-product-canopy").html(event.canopy_panel_type);
+        $("#final-product-lpanel").html(event.final_lpanel_type);
+        $("#final-product-total-price-id").html(event.final_home_price_due);
+
       }, error: function(event){
 
       }
@@ -620,6 +561,7 @@ function master_post_fx()
 // onchange master width
 function master_home_width_fx()
 {
+  $("#pick_footprint_hide_data_change_panel").val(1);
   var master_width = $("#master-home-width-id").val();
   var master_height = $("#master-home-height-id").val();
   var master_post = $("#master-home-post-id").val();
@@ -637,6 +579,7 @@ function master_home_width_fx()
     if(master_width != "" && master_height != "" && master_post != "")
     {
       change_master_post_fx();
+      master_post_fx();
     }
     else if(master_width != "" && master_height != "")
     {
@@ -660,6 +603,7 @@ function master_home_width_fx()
 // 
 function master_home_height_fx()
 {
+  $("#pick_footprint_hide_data_change_panel").val(1);
   var master_width = $("#master-home-width-id").val();
   var master_height = $("#master-home-height-id").val();
   var master_post = $("#master-home-post-id").val();
@@ -677,6 +621,7 @@ function master_home_height_fx()
     if(master_width != "" && master_height != "" && master_post != "")
     {
       change_master_post_fx();
+      master_post_fx();
     }
     else if(master_width != "" && master_height != "")
     {
@@ -699,6 +644,7 @@ function master_home_height_fx()
 // change master posts
 function change_master_post_fx()
 {
+  $("#pick_footprint_hide_data_change_panel").val(1);
   var master_width = $("#master-home-width-id").val();
   var master_height = $("#master-home-height-id").val();
   var master_post = $("#master-home-post-id").val();
@@ -729,6 +675,7 @@ function change_master_post_fx()
 
 // click to next (1st to 2nd)
 $("#first-page-to-next-id").click(function(){
+  var checking_data1 = $("#pick_footprint_hide_data_change_panel").val();
   var master_width = $("#master-home-width-id").val();
   var master_height = $("#master-home-height-id").val();
   var master_post = $("#master-home-post-id").val();
@@ -768,7 +715,7 @@ $("#first-page-to-next-id").click(function(){
     duration: 600
     });
 
-    if(second_page_store == "" || second_page_store == null)
+    if(checking_data1 == "1")
     {
       loading_second_page_data_fx();
     }
@@ -781,9 +728,14 @@ $("#first-page-to-next-id").click(function(){
 // second page
 function loading_second_page_data_fx()
 {
+    $("#pick_footprint_hide_data_change_panel").val(0);
+    var master_width = $("#master-home-width-id").val();
+    var master_height = $("#master-home-height-id").val();
+    var master_post = $("#master-home-post-id").val();
     $.ajax({
       url: "{{ route('satirtha.show-second-page-data') }}",
       type: "GET",
+      data: {master_width: master_width, master_height: master_height, master_post: master_post},
       dataType: "json",
       success: function(event){
         $("#ladder-overhead-datas-show-id").html(event.overhead_types);
@@ -799,6 +751,7 @@ function loading_second_page_data_fx()
 
 function overhead_shades2_change_fx()
 {
+    $("#pick_overhead_shades_hide_data_change_panel").val(1);
     var first_price = $("#first-page-price-hidden-id").val();
     var overhead_val = $("#ladder-overhead-datas-show-id").val();
     if(overhead_val == "")
@@ -858,7 +811,8 @@ $("#second-page-to-next-id").click(function(){
     duration: 600
     });
 
-    video3Dfx();
+    
+      video3Dfx();
 
   }
 })
@@ -872,6 +826,7 @@ function video3Dfx()
   var master_height = $("#master-home-height-id").val();
   var master_post = $("#master-home-post-id").val();
   var overhead_val = $("#ladder-overhead-datas-show-id").val();
+  
 
   $.ajax({
     url: "{{ route('satirtha.show-third-page-data') }}",
@@ -909,7 +864,7 @@ $("#third-page-to-next-id").click(function(){
     duration: 600
     });
 
-    if(fourth_page_data == "" || fourth_page_data == null)
+    if($("#pick_overhead_shades_hide_data_change_panel").val() == "1")
     {
       loading_fourth_page_data_fx();
     }
@@ -920,10 +875,18 @@ $("#third-page-to-next-id").click(function(){
 // start fourth page
 function loading_fourth_page_data_fx()
 {
+  $("#pick_overhead_shades_hide_data_change_panel").val(0);
+
+  var master_width = $("#master-home-width-id").val();
+  var master_height = $("#master-home-height-id").val();
+  var master_post = $("#master-home-post-id").val();
+  var second_page_store = $("#ladder-overhead-datas-show-id").val();
+
   var price_range = $("#second-page-price-hidden-id").val();
   $.ajax({
     url: "{{ route('satirtha.show-fourth-page-data') }}",
     type: "GET",
+    data: {master_width: master_width, master_height: master_height, master_post: master_post, second_page_store: second_page_store},
     dataType: "json",
     success: function(event){
       $("#fourth-page-post-length-id").html(event);
@@ -937,6 +900,7 @@ function loading_fourth_page_data_fx()
 
 function choose_fourth_page_data_fx4()
 {
+  $("#pick_post_length_hide_data_change_panel").val(1);
   var price_range = $("#second-page-price-hidden-id").val();
   var first_step_price = parseInt(price_range);
   var fourth_data = $("#fourth-page-post-length-id").val();
@@ -1001,7 +965,7 @@ $("#fourth-page-to-next-id").click(function(){
     duration: 600
     });
 
-    if(fifth_price_val == "" || fifth_price_val == null)
+    if($("#pick_post_length_hide_data_change_panel").val() == "1")
     {
       load_fifth_page_fx5();
     }
@@ -1014,9 +978,18 @@ $("#fourth-page-to-next-id").click(function(){
 // fifth page
 function load_fifth_page_fx5()
 {
+  var master_width = $("#master-home-width-id").val();
+  var master_height = $("#master-home-height-id").val();
+  var master_post = $("#master-home-post-id").val();
+  var second_page_store = $("#ladder-overhead-datas-show-id").val();
+  var post_length_data = $("#fourth-page-post-length-id").val();
+
+
+  
   $.ajax({
     url: "{{ route('satirtha.show-fifth-page-data') }}",
     type: "GET",
+    data: { master_width: master_width, master_height: master_height, master_post: master_post, second_page_store: second_page_store, post_length_data_val: post_length_data },
     dataType: "json",
     success: function(event){
       $("#pick-slap-mount-panel-load-id").html(event);
@@ -1026,14 +999,22 @@ function load_fifth_page_fx5()
     }, error: function(event){
       
     }
-  })
+  });
+
+  $("#pick_post_length_hide_data_change_panel").val(0);
 }
 
 function load_fifth_page_fx5_show_view()
 {
+  var master_width = $("#master-home-width-id").val();
+  var master_height = $("#master-home-height-id").val();
+  var master_post = $("#master-home-post-id").val();
+  var second_page_store = $("#ladder-overhead-datas-show-id").val();
+  var post_length_data = $("#fourth-page-post-length-id").val();
   $.ajax({
     url: "{{ route('satirtha.show-fifth-page-data') }}",
     type: "GET",
+    data: { master_width: master_width, master_height: master_height, master_post: master_post, second_page_store: second_page_store, post_length_data_val: post_length_data },
     dataType: "json",
     success: function(event){
       $("#pick-slap-mount-panel-load-id").html(event);
@@ -1049,7 +1030,7 @@ $('.checking-radio-panel-of-slap-class input:radio').change(function() {
    {
       $("#mount_answer_hidden_id").val("yes");
       $(".pick-slap-select-panel-class").css('display','block');
-      load_fifth_page_fx5_show_view()
+      load_fifth_page_fx5_show_view();
    }
    else if( $(this).val() == "no")
    {
@@ -1059,6 +1040,7 @@ $('.checking-radio-panel-of-slap-class input:radio').change(function() {
       $("#fifth-page-price-hidden-id").val(fourth_price);
       $("#fifth-total-price-panel-id").html(fourth_price);
       $("#fifth-price-panel-id").html('0');  
+      $("#mount-hidden-panel-price-new-id").val('0');
    }
 });
 
@@ -1072,26 +1054,18 @@ function pick_slap_types_fx5()
       $("#fifth-page-price-hidden-id").val(fourth_price);
       $("#fifth-total-price-panel-id").html(fourth_price);  
       $("#fifth-price-panel-id").html('0');  
+      $("#mount-hidden-panel-price-new-id").val('0');
 
   }
   else
   {
-    $.ajax({
-      url: "{{ route('satirtha.choose-pick-slap-fx5') }}",
-      type: "GET",
-      data: {id: pick_slap_var},
-      dataType: "json",
-      success:  function(event){
         var step1_price = parseInt($("#fourth-page-price-hidden-id").val());
-        var step2_price = parseInt(event.price_list);
+        var step2_price = parseInt($("#pick-slap-mount-panel-load-id").val());
         var main_step3_price = step1_price + step2_price;
         $("#fifth-page-price-hidden-id").val(main_step3_price);
         $("#fifth-total-price-panel-id").html(main_step3_price); 
-        $("#fifth-price-panel-id").html(step2_price);   
-      }, error:  function(event){
-
-      }
-    })
+        $("#fifth-price-panel-id").html(step2_price);  
+        $("#mount-hidden-panel-price-new-id").html(step2_price); 
   }
 }
 
@@ -1194,9 +1168,15 @@ $("#fifth-page-to-next-id").click(function(){
 // start sixth page
 function load_sixth_panel_fx6()
 {
+  var master_width = $("#master-home-width-id").val();
+  var master_height = $("#master-home-height-id").val();
+  var master_post = $("#master-home-post-id").val();
+  var second_page_store = $("#ladder-overhead-datas-show-id").val();
+  var post_length_data = $("#fourth-page-post-length-id").val();
   $.ajax({
     url: "{{ route('satirtha.show-sixth-page-data') }}",
     type: "GET",
+    data: { master_width: master_width, master_height: master_height, master_post: master_post, second_page_store: second_page_store, post_length_data_val: post_length_data },
     dataType: "json",
     success: function(event){
       $(".canopy-note-select-panel-class").html(event);
@@ -1327,9 +1307,15 @@ $("#sixth-page-to-next-id").click(function(){
 // start of seventh page
 function loading_seventh_page_datas_fx7()
 {
+  var master_width = $("#master-home-width-id").val();
+  var master_height = $("#master-home-height-id").val();
+  var master_post = $("#master-home-post-id").val();
+  var second_page_store = $("#ladder-overhead-datas-show-id").val();
+  var post_length_data = $("#fourth-page-post-length-id").val();
   $.ajax({
     url: "{{ route('satirtha.show-seventh-page-data') }}",
     type: "GET",
+    data: { master_width: master_width, master_height: master_height, master_post: master_post, second_page_store: second_page_store, post_length_data_val: post_length_data },
     dataType: "json",
     success: function(event){
       $(".checking-radio-panel-of-lpanel2-class").html(event.lpanel_radio_panel);
@@ -1345,14 +1331,21 @@ function loading_seventh_page_datas_fx7()
 $('.checking-radio-panel-of-lpanel1-class input:radio').change(function() {
    if( $(this).val() == "yes")
    {  
+    var master_width = $("#master-home-width-id").val();
+    var master_height = $("#master-home-height-id").val();
+    var master_post = $("#master-home-post-id").val();
+    var second_page_store = $("#ladder-overhead-datas-show-id").val();
+    var post_length_data = $("#fourth-page-post-length-id").val();
      $("#lpanel_answer_hidden_id").val("yes");
       $.ajax({
         url: "{{ route('satirtha.show-seventh-page-data') }}",
         type: "GET",
+        data: { master_width: master_width, master_height: master_height, master_post: master_post, second_page_store: second_page_store, post_length_data_val: post_length_data },
         dataType: "json",
         success: function(event){
           $(".checking-radio-panel-of-lpanel2-class").html(event.lpanel_radio_panel);
           $("#lpanel-wish-price-id").html(event.new_price);
+          $("#lpanel-hide-radio-btn-panel-price-id").val(event.new_price);
           var second_price = parseInt(event.new_price);
           var first_price = parseInt($("#sixth-panel-price-hidden-id").val());
           var total_price = first_price + second_price;
@@ -1368,6 +1361,7 @@ $('.checking-radio-panel-of-lpanel1-class input:radio').change(function() {
    {
     $("#lpanel_answer_hidden_id").val("no");
       $("#lpanel-wish-price-id").html('0');
+      $("#lpanel-hide-radio-btn-panel-price-id").val('0');
       $(".checking-radio-panel-of-lpanel2-class").css('display','none');
       $("#seventh-total-price-panel-id").html($("#sixth-panel-price-hidden-id").val());
       $("#seventh-panel-price-hidden-id").val($("#sixth-panel-price-hidden-id").val());
@@ -1380,6 +1374,7 @@ function my_seveth_click(main_price)
   var first_price = parseInt($("#sixth-panel-price-hidden-id").val());
   var total_price = first_price + second_price;
   $("#lpanel-wish-price-id").html(main_price);
+  $("#lpanel-hide-radio-btn-panel-price-id").html(main_price);
   $("#seventh-total-price-panel-id").html(total_price);
   $("#seventh-panel-price-hidden-id").val(total_price);
 }
@@ -1422,6 +1417,8 @@ function final_product_img_fx()
   var overhead_type_val = $("#ladder-overhead-datas-show-id").val();
   var post_length_val = $("#fourth-page-post-length-id").val();
   var slap_panel_val_type = $("#mount_answer_hidden_id").val();
+
+  // alert(master_width+" "+master_height+" "+master_post+" "+overhead_type_val+" "+post_length_val+" "+slap_panel_val_type);
  
   if(slap_panel_val_type == "no" || slap_panel_val_type ==  "" || slap_panel_val_type ==  null || slap_panel_val_type ==  "undefined")
   {
@@ -1452,7 +1449,7 @@ function final_product_img_fx()
     var lpanel_val_details = "yes";
   }
   $("#final-product-total-price-id").html($("#seventh-panel-price-hidden-id").val());
-
+  
   $.ajax({
     url: "{{ route('satirtha.show-final-page-data') }}",
     type: "GET",
@@ -1467,7 +1464,7 @@ function final_product_img_fx()
       $(".last-footprint-img-class").html(event.final_footprint_img);
       $("#final-product-mount").html(slap_new_details);
       $("#final-product-canopy").html(canopy_val_details);
-      $("#final-product-lpanel").html(lpanel_val_details);
+      $("#final-product-lpanel").html($("#lpanel_answer_hidden_id").val());
 
       insert_before_checkout_product();
     }, error: function(event){
@@ -1533,7 +1530,7 @@ function insert_before_checkout_product()
     var canopy_val_details = "yes";
   }
   
-  var lpanel_val_type = $(".checking-radio-panel-of-lpanel1-class input[type=radio]:checked").val();
+  var lpanel_val_type = $("#lpanel_answer_hidden_id").val();
   if(lpanel_val_type == "no" || lpanel_val_type ==  "" || lpanel_val_type ==  null || lpanel_val_type ==  "undefined")
   {
     var lpanel_val_details = "no";
@@ -1542,15 +1539,19 @@ function insert_before_checkout_product()
   else if(lpanel_val_type == "yes")
   {
     var lpanel_val_details = "yes";
-    var lpanel_main_data = $(".checking-radio-panel-of-lpanel2-class input[type=radio]:checked").val();
+    var lpanel_main_data = $("#lpanel-hide-radio-btn-panel-price-id").val();
   }
 
   var total_price = $("#seventh-panel-price-hidden-id").val();
 
+  var mount_panel_hide_price = $("#mount-hidden-panel-price-new-id").val();
+
+  var canopy_price = $("#sixth-pregenerated-price-hidden-val-id").val();
+
   $.ajax({
     url : "{{ route('satirtha.BeforeCheckoutFinalProduct') }}",
     type: "GET",
-    data: {master_width: master_width, master_height: master_height, master_post: master_post, overhead_type_val: overhead_type_val, post_length_val: post_length_val, slap_mount_type: slap_new_details, mount_data: mount_data, canopy_type_data: canopy_val_details, lpanel_val_type: lpanel_val_details, lpanel_main_data: lpanel_main_data, total_price: total_price },
+    data: {master_width: master_width, master_height: master_height, master_post: master_post, overhead_type_val: overhead_type_val, post_length_val: post_length_val, slap_mount_type: slap_new_details, mount_panel_hide_price: mount_panel_hide_price, canopy_type_data: canopy_val_details, canopy_price: canopy_price, lpanel_val_type: lpanel_val_details, lpanel_main_data: lpanel_main_data, total_price: total_price },
     dataType: "json",
     success: function(event){
       console.log(event);

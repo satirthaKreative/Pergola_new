@@ -16,6 +16,9 @@ use App\Model\Admin\PickOverheadShades\PickOverheadShadesModel;
 use App\Model\Admin\PickPostMountBracket\PickPostMountBracketModel;
 use App\Model\Front\BeforeCheckoutFinalProductModel;
 use App\Model\Admin\FinalProduct\FinalProductModel;
+use App\Model\Admin\CombinationModel\CombinationModel;
+use App\Model\Admin\MasterPostLength\MasterPostLengthModel;
+use App\Model\Admin\MasterOverheadModel;
 
 class MainHomeController extends Controller
 {
@@ -125,7 +128,9 @@ class MainHomeController extends Controller
         {
             $array_post_names[] = $choosePostTypeQ->posts_master;
         }
+        
         $widthQuery = PillerPostModel::whereIn('id',$array_post_names)->get();
+
         
         $html = '<option value="">Choose posts</option>';
         if(count($widthQuery) > 0)
@@ -207,7 +212,7 @@ class MainHomeController extends Controller
 
     public function show_overheads_fx2(Request $request)
     {
-        $findQuery = PickOverheadShadesModel::where('admin_action','yes')->get();
+        $findQuery = PickOverheadShadesModel::where(['master_width' => $_GET['master_width'], 'master_height' => $_GET['master_height'], 'master_post' => $_GET['master_post']])->get();
         $html['overhead_types'] = "<option value=''>Choose a overhead shades</option>";
         if(count($findQuery) > 0)
         {
@@ -227,7 +232,9 @@ class MainHomeController extends Controller
                         
                     }
                 }
-                $html['overhead_types'] .= "<option value=".$fQuery->id." ".$checked.">".$fQuery->img_standard_name."</option>";
+
+                
+                $html['overhead_types'] .= "<option value=".$fQuery->master_overhead_shades." ".$checked.">".$fQuery->img_standard_name."</option>";
             }
         }
         echo json_encode($html);
@@ -261,7 +268,7 @@ class MainHomeController extends Controller
     // start of fourth page
     public function show_pick_post_length_fx4(Request $request)
     {
-        $chooseQuery = PickPostLengthModel::where(['admin_action' => 'yes'])->get();
+        $chooseQuery = PickPostLengthModel::where(['master_width' => $_GET['master_width'], 'master_height' => $_GET['master_height'], 'master_post' => $_GET['master_post'], 'master_overhead_shades' => $_GET['second_page_store']])->get();
         $html = '<option value="">Choose a post length</option>';
         if(count($chooseQuery) > 0)
         {
@@ -280,7 +287,11 @@ class MainHomeController extends Controller
                         
                     }
                 }
-                $html .= '<option value='.$cQuery->id.' '.$checked.'>'.$cQuery->posts_length.'</option>';
+                $fetchTheFinalOne = MasterPostLengthModel::where(['id' => $cQuery->posts_length])->get();
+                foreach($fetchTheFinalOne as $fQueryLenght)
+                {
+                    $html .= '<option value='.$fQueryLenght->id.' '.$checked.'>'.$fQueryLenght->master_post_length.' ft.</option>';
+                }
             }
         }
         echo json_encode($html);
@@ -288,6 +299,7 @@ class MainHomeController extends Controller
 
     public function choose_pick_post_length_fx4(Request $request)
     {
+        $request->session()->put('final_product_combination_session_id', $_GET['id']);
         $chooseQuery = PickPostLengthModel::where(['admin_action' => 'yes', 'id' => $_GET['id']])->get();
         
         if(count($chooseQuery) > 0)
@@ -312,7 +324,8 @@ class MainHomeController extends Controller
     // fifth start page
     public function show_pick_post_mount_fx5(Request $request)
     {
-        $chooseQuery = PickPostMountBracketModel::where(['admin_action' => 'yes'])->get();
+       
+        $chooseQuery = PickPostLengthModel::where(['posts_length' => $_GET['post_length_data_val'], 'master_width' => $_GET['master_width'], 'master_height' => $_GET['master_height'], 'master_post' => $_GET['master_post'], 'master_overhead_shades' => $_GET['second_page_store'] ])->get();
         $html = '<option value="">Choose a pick slap</option>';
         if(count($chooseQuery) > 0)
         {
@@ -320,19 +333,28 @@ class MainHomeController extends Controller
                 
             foreach($chooseQuery as $cQuery)
             {    
-                if($request->session()->has('main_unique_session_key'))
+
+                $chooseMainQuery = CombinationModel::where('combination_id',$cQuery->id)->get();
+
+                foreach($chooseMainQuery as $cQuery1)
                 {
-                    $mQuery_check = BeforeCheckoutFinalProductModel::where('unique_session_id',$request->session()->get('main_unique_session_key'))->get();
-                    foreach($mQuery_check as $mQc)
-                    {
-                        if($mQc->final_post_mount == $cQuery->id)
-                        {
-                            $checked = "selected";
-                        }
-                        
-                    }
+                    $html .= '<option value='.$cQuery1->new_price.'>New Price</option>';
+                    $html .= '<option value='.$cQuery1->existing_price.'>Existing Price</option>';
                 }
-                $html .= '<option value='.$cQuery->id.' '.$checked.'>'.$cQuery->pick_slap_name.'</option>';
+
+                // if($request->session()->has('main_unique_session_key'))
+                // {
+                //     $mQuery_check = BeforeCheckoutFinalProductModel::where('unique_session_id',$request->session()->get('main_unique_session_key'))->get();
+                //     foreach($mQuery_check as $mQc)
+                //     {
+                //         if($mQc->final_post_mount == $cQuery->id)
+                //         {
+                //             $checked = "selected";
+                //         }
+                        
+                //     }
+                // }
+                
             }
         }
         echo json_encode($html);
@@ -352,16 +374,25 @@ class MainHomeController extends Controller
     // start of sixth page
     public function show_pick_canopy_fx6(Request $request)
     {
-        $chooseQuery = PickCanopyModel::where(['admin_action' => 'yes'])->limit(1)->get();
-        $html = "";
+        $chooseQuery = PickPostLengthModel::where(['posts_length' => $_GET['post_length_data_val'], 'master_width' => $_GET['master_width'], 'master_height' => $_GET['master_height'], 'master_post' => $_GET['master_post'], 'master_overhead_shades' => $_GET['second_page_store'] ])->get();
+        $html = '';
         if(count($chooseQuery) > 0)
         {
+            $checked = "";
+                
             foreach($chooseQuery as $cQuery)
-            {
-                $html .= '<p>'.ucwords($cQuery->canopy_question).'</p>
-                <p>Note: '.$cQuery->canopy_note.'</p>
-                <input type="hidden" name="" id="sixth-pregenerated-price-hidden-val-id" value="'.$cQuery->canopy_price.'" />
-                <h4>Price <span>$<span id="sixth-price-panel-id">'.$cQuery->canopy_price.'</span></span></h4>';
+            {    
+
+                $chooseMainQuery = CombinationModel::where('combination_id',$cQuery->id)->get();
+
+                foreach($chooseMainQuery as $cQuery1)
+                {
+                    $html .= '<p>'.ucwords($cQuery1->canopy_list).'</p>
+                    <p>Note: '.$cQuery1->canopy_list.'</p>
+                    <input type="hidden" name="" id="sixth-pregenerated-price-hidden-val-id" value="'.$cQuery1->canopy_price.'" />
+                    <h4>Price <span>$<span id="sixth-price-panel-id">'.$cQuery1->canopy_price.'</span></span></h4>';
+                }
+
             }
         }
         echo json_encode($html);
@@ -371,32 +402,36 @@ class MainHomeController extends Controller
     // start of seventh page
     public function show_pick_lpanel_fx7(Request $request)
     {
-        $chooseQuery = PickLouveredPanelModel::where(['admin_action' => 'yes'])->get();
+
+        $chooseQuery = PickPostLengthModel::where(['posts_length' => $_GET['post_length_data_val'], 'master_width' => $_GET['master_width'], 'master_height' => $_GET['master_height'], 'master_post' => $_GET['master_post'], 'master_overhead_shades' => $_GET['second_page_store'] ])->get();
         $html['lpanel_radio_panel'] = "";
         if(count($chooseQuery) > 0)
         {
+            $checked = "";
+                
             foreach($chooseQuery as $cQuery)
-            {
-                $checking_Checked = PickLouveredPanelModel::where(['admin_action' => 'yes'])->orderBy('id','asc')->limit(1)->get();
-                foreach($checking_Checked as $c_new_price)
+            {    
+
+                $chooseMainQuery = CombinationModel::where('combination_id',$cQuery->id)->get();
+                
+                
+
+                foreach($chooseMainQuery as $cQuery1)
                 {
-                    $got_new_id = $c_new_price->id;
+                    $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery1->left_price.'") > Left </li>';
+                    $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery1->rear_price.'") > Rear</li>';
+                    $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery1->right_price.'") > Right </li>';
+                    $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery1->left_rear_price.'") > Left + Rear</li>';
+                    $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery1->right_rear_price.'") > Right + Rear</li>';
+                    $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery1->left_right_rear_price.'") > Left + Right + Rear</li>';
+
+                    $html['new_price'] = $cQuery1->left_price;
                 }
 
-                $checking_var = "";
-                if($cQuery->id == $got_new_id)
-                {
-                    $checking_var = "checked";
-                }
-                $html['lpanel_radio_panel'] .= '<li><input type="radio" name="bracket" onclick=my_seveth_click("'.$cQuery->l_panel_price.'") '.$checking_var.'> '.$cQuery->l_panel_name.'</li>';
             }
-
-                $checking_Checked_query = PickLouveredPanelModel::where(['admin_action' => 'yes'])->orderBy('id','asc')->limit(1)->get();
-                foreach($checking_Checked_query as $c_new_price1)
-                {
-                    $html['new_price'] = $c_new_price1->l_panel_price;
-                }
         }
+
+
         echo json_encode($html);
     }
     // end of seventh page
@@ -429,41 +464,32 @@ class MainHomeController extends Controller
             $html['height_data'] = $heightQuery->master_height_length;
         }
 
-        $master_footprint_query = PickUpFootPrintModel::where(['height_master' => $master_height, 'width_master' => $master_width, 'posts_master' => $master_post ])->get();
-        if(count($master_footprint_query) > 0)
+        $master_final_product_page_query = FinalProductModel::where('pick_footprint',$request->session()->get('final_product_combination_session_id'))->get();
+        if(count($master_final_product_page_query) > 0)
         {
-            foreach($master_footprint_query as $footprintQuery)
+            foreach($master_final_product_page_query as $finalPQuery)
             {
-                $html['footprint_data'] = $footprintQuery->id;
-
-                $finalProductQuery = FinalProductModel::where(['pick_footprint' => $footprintQuery->id, 'overhead_shades' => $overhead_type_val, 'post_length' => $post_length_val ])->get();
-                if(count($finalProductQuery) > 0)
-                {
-                    foreach($finalProductQuery as $finalPQuery)
-                    {
-                        $html['final_prod_img'] = "";
-                        $html['final_footprint_img'] = "";
-                        if($finalPQuery->final_product_img != "" || $finalPQuery->final_product_img != null){
-                            $html['final_prod_img'] = '<img src="'.str_replace('public','storage/app/public',asset($finalPQuery->final_product_img)).'"  alt=""/>';
-                        }
-                        if($finalPQuery->final_footprint_img != "" || $finalPQuery->final_footprint_img != null){
-                            $html['final_footprint_img'] = '<img src="'.str_replace('public','storage/app/public',asset($finalPQuery->final_footprint_img)).'"  alt=""/>';
-                        }
-                    }
+                $html['final_prod_img'] = "";
+                $html['final_footprint_img'] = "";
+                if($finalPQuery->final_product_img != "" || $finalPQuery->final_product_img != null){
+                    $html['final_prod_img'] = '<img src="'.str_replace('public','storage/app/public',asset($finalPQuery->final_product_img)).'"  alt=""/>';
+                }
+                if($finalPQuery->final_footprint_img != "" || $finalPQuery->final_footprint_img != null){
+                    $html['final_footprint_img'] = '<img src="'.str_replace('public','storage/app/public',asset($finalPQuery->final_footprint_img)).'"  alt=""/>';
                 }
             }
         }
 
-        $post_length_query = PickPostLengthModel::where('id',$post_length_val)->get();
+        $post_length_query = MasterPostLengthModel::where('id',$post_length_val)->get();
         foreach($post_length_query as $pQuery)
         {
-            $html['length_data'] = $pQuery->posts_length;
+            $html['length_data'] = $pQuery->master_post_length;
         }
 
-        $overhead_query = PickOverheadShadesModel::where('id',$overhead_type_val)->get();
+        $overhead_query = MasterOverheadModel::where('id',$overhead_type_val)->get();
         foreach($overhead_query as $pOverQuery)
         {
-            $html['overhead_data'] = $pOverQuery->img_standard_name;
+            $html['overhead_data'] = $pOverQuery->overhead_shades_val;
         }
 
         echo json_encode($html);
